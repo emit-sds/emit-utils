@@ -10,7 +10,8 @@ from typing import List
 import numpy as np
 
 
-def get_bounding_extent(file_list: List, return_pixel_offsets=False, return_spatial_offsets=False):
+def get_bounding_extent(file_list: np.array, return_pixel_offsets=False, return_spatial_offsets=False,
+                        return_global_lower_rights=False):
     """
     Get the outer bounded extent of a list of files, with options to also return pixel and
     spatial offsets of each file.  Pixel offsets assume everything is on the same grid.
@@ -18,8 +19,9 @@ def get_bounding_extent(file_list: List, return_pixel_offsets=False, return_spat
         file_list: array-like input of geospatial files
         return_pixel_offsets: flag indicating if per-file pixel offsets should be returned
         return_spatial_offsets: flag indicating if per-file spatial offsets should be returned
+        return_global_lower_rights: flag indicating if per-file output-space lower right coordinates should be returned
     Returns:
-        x_min, y_max, x_max, y_min, [offset_px_list (x,y tuples)], [offset_spatial_list (x,y tuples)]
+        x_min, y_max, x_max, y_min, [offset_px_list (x,y tuples)], [offset_spatial_list (x,y tuples)], [global_lower_rights (x,y tuples)]
     """
 
     geotransforms = []
@@ -41,7 +43,8 @@ def get_bounding_extent(file_list: List, return_pixel_offsets=False, return_spat
 
     px_offsets = []
     map_offsets = []
-    for trans in geotransforms:
+    global_lower_rights = []
+    for trans, extent in zip(geotransforms, extents):
         x_offset_px = int(round((trans[0] - min_x)/trans[1]))
         x_offset_map = trans[0] - min_x
 
@@ -50,6 +53,12 @@ def get_bounding_extent(file_list: List, return_pixel_offsets=False, return_spat
 
         px_offsets.append((x_offset_px,y_offset_px))
         map_offsets.append((x_offset_map,y_offset_map))
+
+        if return_global_lower_rights:
+            x_lr_px = x_offset_px + extent[0]
+            y_lr_px = y_offset_px + extent[1]
+            global_lower_rights.append((x_lr_px, y_lr_px))
+
 
     if return_pixel_offsets:
         return_set += px_offsets

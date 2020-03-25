@@ -7,10 +7,10 @@ Author: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 import os
 import gdal
 import logging
-from typing import List
+import numpy as np
 
 
-def check_files_exist(file_list: List):
+def check_files_exist(file_list: np.array):
     """ Check if files exist on the system.
     Args:
         file_list: array-like of files to check
@@ -27,7 +27,7 @@ def check_files_exist(file_list: List):
         FileNotFoundError('Files missing, check logs for details')
 
 
-def check_raster_drivers(file_list: List):
+def check_raster_drivers(file_list: np.array):
     """ Check if files have a recognized gdal raster driver (e.g., can be opened).
     Args:
         file_list: array-like of files to check
@@ -43,7 +43,7 @@ def check_raster_drivers(file_list: List):
         FileNotFoundError('Files not in recognized raster format, check logs for details')
 
 
-def check_same_raster_projections(file_list: List):
+def check_same_raster_projections(file_list: np.array):
     """ Check that files have the same projection.  Assumes input files exist and are rasters.
     Args:
         file_list: array-like of files to check
@@ -61,7 +61,7 @@ def check_same_raster_projections(file_list: List):
         AttributeError('Files have mismatched projections, check logs for details')
 
 
-def check_same_raster_resolutions(file_list: List, fractional_tolerance: float = 0.0001):
+def check_same_raster_resolutions(file_list: np.array, fractional_tolerance: float = 0.0001):
     """ Check that files have the same resolution.  Assumes input files exist and are rasters.
     Args:
         file_list: array-like of files to check
@@ -81,7 +81,7 @@ def check_same_raster_resolutions(file_list: List, fractional_tolerance: float =
         AttributeError('Files have mismatched resolutions, check logs for details')
 
 
-def check_raster_files(file_list: List, fractional_tolerance: float = 0.0001, map_space: bool = False):
+def check_raster_files(file_list: np.array, fractional_tolerance: float = 0.0001, map_space: bool = False):
     """ Check that files exist, are openable by gdal, and have the same projections
     and resolutions (if necessary)
     Args:
