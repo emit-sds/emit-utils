@@ -20,11 +20,12 @@ def check_files_exist(file_list: np.array):
     anybad = False
     for file in file_list:
         if os.path.isfile(file) is False:
+            import ipdb; ipdb.set_trace()
             logging.error('File: {} does not exist'.format(file))
             anybad = True
 
     if anybad:
-        FileNotFoundError('Files missing, check logs for details')
+        raise FileNotFoundError('Files missing, check logs for details')
 
 
 def check_raster_drivers(file_list: np.array):
@@ -40,7 +41,7 @@ def check_raster_drivers(file_list: np.array):
             logging.error('Input GLT file: {} not a recognized raster format'.format(file))
             anybad = True
     if anybad:
-        FileNotFoundError('Files not in recognized raster format, check logs for details')
+        raise FileNotFoundError('Files not in recognized raster format, check logs for details')
 
 
 def check_same_raster_projections(file_list: np.array):
@@ -58,7 +59,7 @@ def check_same_raster_projections(file_list: np.array):
             logging.error('Projection in file {} differs from projection in file {}'.format(file, file_list[0]))
             anybad = True
     if anybad:
-        AttributeError('Files have mismatched projections, check logs for details')
+        raise AttributeError('Files have mismatched projections, check logs for details')
 
 
 def check_same_raster_resolutions(file_list: np.array, fractional_tolerance: float = 0.0001):
@@ -70,15 +71,16 @@ def check_same_raster_resolutions(file_list: np.array, fractional_tolerance: flo
         None
     """
     anybad = False
-    base_trans = gdal.Open(file_list[0], gdal.GA_ReadOnly).GetGeoTranform()
+    base_trans = gdal.Open(file_list[0], gdal.GA_ReadOnly).GetGeoTransform()
     for file in file_list:
         transform = gdal.Open(file, gdal.GA_ReadOnly).GetGeoTransform()
-        if abs((transform[1] - base_trans[1])/base_trans[1]) < fractional_tolerance and \
-           abs((transform[5] - base_trans[5]) / base_trans[5]) < fractional_tolerance:
-            logging.error('Resolution in file {} differs from resolution in file {}'.format(file, file_list[0]))
+        if abs((transform[1] - base_trans[1])/base_trans[1]) > fractional_tolerance and \
+           abs((transform[5] - base_trans[5]) / base_trans[5]) > fractional_tolerance:
+            logging.error('Resolution difference. File {} resolution: {} {}\n'
+                          '                       File {} resolution: {} {} '.format(file, transform[1], transform[5], file_list[0], base_trans[1], base_trans[5]))
             anybad = True
     if anybad:
-        AttributeError('Files have mismatched resolutions, check logs for details')
+        raise AttributeError('Files have mismatched resolutions, check logs for details')
 
 
 def check_raster_files(file_list: np.array, fractional_tolerance: float = 0.0001, map_space: bool = False):
