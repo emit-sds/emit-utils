@@ -6,8 +6,8 @@ Author: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 
 
 import gdal
-from typing import List
 import numpy as np
+import logging
 
 
 def get_bounding_extent(file_list: np.array, return_pixel_offsets=False, return_spatial_offsets=False,
@@ -65,6 +65,40 @@ def get_bounding_extent(file_list: np.array, return_pixel_offsets=False, return_
 
     if return_spatial_offsets:
         return_set += map_offsets
+
+    return return_set
+
+
+def get_bounding_extent_igms(file_list: np.array, return_per_file_xy=False):
+    """
+    Get the outer bounded extent of a list of IGMS, band-order x,y,z , with options to also return per-file bounding
+    boxes.  No grid assumptions are required.
+    Args:
+        file_list: array-like input of geospatial files
+        return_per_file_xy: flag indicating if per-file min/max xy maps should be returned
+    Returns:
+        x_min, y_max, x_max, y_min, [file_min_xy (x,y tuples)], [file_max_xy (x,y tuples)]
+    """
+
+    file_min_xy = []
+    file_max_xy = []
+    for file in file_list:
+        dataset = gdal.Open(file, gdal.GA_ReadOnly)
+        igm = dataset.ReadAsArray()[:2,...]
+        file_min_xy.append((np.min(igm[0,...]), np.min(igm[1,...])))
+        file_max_xy.append((np.max(igm[0,...]), np.max(igm[1,...])))
+        logging.debug('File: {} loaded.  min xy: {}, max xy {}'.format(file, file_min_xy[-1], file_max_xy[-1]))
+
+    # find bounding x and y coordinate locations
+    min_x = np.nanmin([x[0] for x in file_min_xy])
+    min_y = np.nanmin([x[1] for x in file_min_xy])
+    max_x = np.nanmax([x[0] for x in file_max_xy])
+    max_y = np.nanmax([x[1] for x in file_max_xy])
+    logging.debug('Complete set min xy: {}, max xy: {}'.format((min_x, min_y),(max_x, max_y)))
+
+    return_set = min_x, max_y, max_x, min_y
+    if return_per_file_xy:
+        return_set += file_min_xy, file_max_xy
 
     return return_set
 
