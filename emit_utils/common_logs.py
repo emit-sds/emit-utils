@@ -18,4 +18,4 @@ def logtime():
 
     start_time = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
-    logging.log('Current UTC time is: {}'.format(start_time))
+    logging.log(logging.INFO, 'Current UTC time is: {}'.format(start_time))
