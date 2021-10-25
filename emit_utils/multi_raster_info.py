@@ -5,9 +5,10 @@ Author: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 """
 
 
-import gdal
+from osgeo import gdal
 import numpy as np
 import logging
+import os
 
 
 def get_bounding_extent(file_list: np.array, return_pixel_offsets=False, return_spatial_offsets=False,
@@ -101,5 +102,3 @@ def get_bounding_extent_igms(file_list: np.array, return_per_file_xy=False):
         return_set += file_min_xy, file_max_xy
 
     return return_set
-
-
