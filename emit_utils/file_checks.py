@@ -123,3 +123,18 @@ def envi_header(inputpath):
         return inputpath
     else:
         return inputpath + '.hdr'
+
+
+def netcdf_ext(basepath):
+    """
+    Give filename with consistent netcdf output file extention
+    Args:
+        basepath: path with or without netcdf extension
+    Returns:
+        str: the basepath with the netcdf extension
+    """
+
+    if os.path.splitext(basepath)[-1] == ".nc":
+        return os.path.splitext(basepath)[0] + '.nc'
+    else:
+        return basepath + '.nc'
