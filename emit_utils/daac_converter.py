@@ -42,7 +42,7 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
     output_extent[0], output_extent[1], _ = transformer.TransformPoint(*ul)
     output_extent[2], output_extent[3], _ = transformer.TransformPoint(*lr)
 
-    return output_extent,
+    return output_extent, trans[1]
 
 
 def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
