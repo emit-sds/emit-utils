@@ -54,8 +54,8 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
         nc_var.units = units
 
     if data_type is str:
-        for _n in range(len(data.flatten())):
-            nc_var[_n] = data.flatten()[_n]
+        for _n in range(len(data)):
+            nc_var[_n] = data[_n]
     else:
         nc_var[...] = data
     nc_ds.sync()
