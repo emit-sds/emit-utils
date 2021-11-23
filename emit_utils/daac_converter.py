@@ -152,14 +152,14 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
         source regions that can be used to improve forecasts of the role of mineral dust in the radiative forcing \
         (warming or cooling) of the atmosphere."
 
-    nc_ds.keywords = "Imaging Spectroscopy, minerals, EMIT, dust, ..."  # add keywords, "highly recommended"
-    nc_ds.Conventions = "CF-1.6, ACDD-1.3"
+    nc_ds.keywords = "Imaging Spectroscopy, minerals, EMIT, dust, radiative forcing"
+    nc_ds.Conventions = "CF-1.63, ACDD-1.3"
     # Not required or highly recommended.
     nc_ds.sensor = "EMIT (Earth Surface Mineral Dust Source Investigation)"
     nc_ds.instrument = "EMIT"
     nc_ds.platform = "ISS"
     nc_ds.processing_version = "V1.0"
-    nc_ds.Conventions = "CF-1.6"
+    nc_ds.Conventions = "CF-1.63"
     nc_ds.institution = "NASA Jet Propulsion Laboratory/California Institute of Technology"
     nc_ds.license = "https://science.nasa.gov/earth-science/earth-science-data/data-information-policy/"
     nc_ds.naming_authority = "LPDAAC"
