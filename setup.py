@@ -10,7 +10,12 @@ setup(name='emit_utils',
       packages=find_packages(),
       include_package_data=True,
       version='0.2.0',
-      install_requires=['gdal>=2.0'],
+      install_requires=[
+          'gdal>=2.0',
+          'spectral>=0.21',
+          'numpy>=1.19.2',
+          'netcdf4>=1.5.8'
+      ],
       python_requires='>=3',
       platforms='any',
       classifiers=['Programming Language :: Python :: 3',
