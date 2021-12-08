@@ -5,14 +5,16 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
          Nimrod Carmon, nimrod.carmon@jpl.nasa.gov
 """
 
-from datetime import datetime, timedelta
-import numpy as np
+import hashlib
 import netCDF4
-from spectral.io import envi
-from emit_utils.file_checks import envi_header
-from osgeo import gdal, osr
-from typing import List
 import os
+
+from datetime import datetime, timedelta
+from osgeo import gdal, osr
+from spectral.io import envi
+from typing import List
+
+from emit_utils.file_checks import envi_header
 
 NODATA = -9999.
 
@@ -200,3 +202,12 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     nc_ds.sync()  # flush
 
 
+def calc_checksum(path, hash_alg="sha512"):
+    checksum = {}
+    if hash_alg.lower() == "sha512":
+        h = hashlib.sha512()
+    with open(path, "rb") as f:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: f.read(4096), b""):
+            h.update(byte_block)
+    return h.hexdigest()
