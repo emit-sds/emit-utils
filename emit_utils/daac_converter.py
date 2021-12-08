@@ -202,11 +202,10 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     nc_ds.sync()  # flush
 
 
-def calc_checksum(path, hash_alg):
+def calc_checksum(path, hash_alg="sha512"):
     checksum = {}
     if hash_alg.lower() == "sha512":
-        h = hashlib.sha512
-        hashlib.sh
+        h = hashlib.sha512()
     with open(path, "rb") as f:
         # Read and update hash string value in blocks of 4K
         for byte_block in iter(lambda: f.read(4096), b""):
