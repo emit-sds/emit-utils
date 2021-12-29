@@ -197,7 +197,7 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
         nc_ds.southernmost_latitude = ul_lr[3]
         nc_ds.spatialResolution = res
 
-    nc_ds.day_night_flag = primary_ds.metadata['emit acquisition daynight']
+    nc_ds.day_night_flag = "day" #primary_ds.metadata['emit acquisition daynight'] #TODO - replace
 
     nc_ds.sync()  # flush
 
