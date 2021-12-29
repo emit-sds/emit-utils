@@ -8,7 +8,25 @@ import os
 from osgeo import gdal
 import logging
 import numpy as np
+from spectral.io import envi
 
+def check_daynight(obs_file: str, zenith_band=4):
+    """
+    Determine if an acquisition is from daytime or nighttime
+    Args:
+        obs_file: path to scene observation file
+
+    Returns:
+        daynight: string indicator of day/night
+    """
+    ds = envi.open(envi_header(obs_file))
+    zenith = ds.open_memmap(interleave='bip').open_memmap()[...,zenith_band]
+    min_zenith = np.percentile(zenith[zenith != -9999], 2)
+    max_zenith = np.percentile(zenith[zenith != -9999], 98)
+    if min_zenith < 90 and max_zenith < 90:
+        return 'day'
+    else:
+        return 'night'
 
 def check_files_exist(file_list: np.array):
     """ Check if files exist on the system.

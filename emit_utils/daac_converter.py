@@ -80,7 +80,7 @@ def add_loc(nc_ds, loc_envi_file):
     add_variable(nc_ds, "location/lon", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
                  {"dimensions": ("number_of_scans", "pixels_per_scan")} )
 
-    add_variable(nc_ds, "location/z", "d", "Surface Elevation", "m", loc[..., 2].copy(),
+    add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
                  {"dimensions": ("number_of_scans", "pixels_per_scan")} )
     nc_ds.sync()
 
