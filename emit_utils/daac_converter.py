@@ -14,6 +14,7 @@ from osgeo import gdal, osr
 from spectral.io import envi
 from typing import List
 import json
+import numpy as np
 
 from emit_utils.file_checks import envi_header
 
@@ -227,7 +228,7 @@ def initialize_ummg(granule_name: str, creation_time: str, collection_name: str,
         collection_version: collection version
 
     Returns:
-        none
+        dictionary representation of ummg
     """
 
     ummg = get_required_ummg()
@@ -240,7 +241,22 @@ def initialize_ummg(granule_name: str, creation_time: str, collection_name: str,
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
         "Version": collection_version
-    },
+    }
+    return ummg
+
+
+
+class SerialEncoder(json.JSONEncoder):
+    """Encoder for json to help ensure json objects can be passed to the workflow manager.
+    """
+
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        else:
+            return super(SerialEncoder, self).default(obj)
 
 
 def dump_json(json_content: dict, filename: str):
@@ -251,8 +267,8 @@ def dump_json(json_content: dict, filename: str):
         filename: output filename to write to
     """
 
-    with open(filename, errors='ignore') as fout:
-        fout.write(json.dumps(json_content, indent=2, sort_keys=False))
+    with open(filename, 'w', errors='ignore') as fout:
+        fout.write(json.dumps(json_content, indent=2, sort_keys=False, cls=SerialEncoder))
 
 
 def add_boundary_ummg(ummg: dict, boundary_points: list):
