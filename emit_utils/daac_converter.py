@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from osgeo import gdal, osr
 from spectral.io import envi
 from typing import List
+import json
 
 from emit_utils.file_checks import envi_header
 
@@ -200,6 +201,140 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     nc_ds.day_night_flag = primary_ds.metadata['emit acquisition daynight']
 
     nc_ds.sync()  # flush
+
+
+def get_required_ummg():
+    """ Get the required UMMG base dictionary
+
+    Returns:
+        ummg: dictionary with required parameters
+
+    """
+    ummg = {}
+    ummg['MetadataSpecification'] = {}
+    ummg['GranuleUR'] = ''
+    ummg['ProviderDates'] = []
+    ummg['CollectionReference'] = ''
+    return ummg
+
+
+def initialize_ummg(granule_name: str, creation_time: str, collection_name: str, collection_version: str = "1.0"):
+    """ Initialize a UMMG metadata output file
+    Args:
+        granule_name: granule UR tag
+        creation_time: creation timestamp
+        collection_name: short name of collection reference
+        collection_version: collection version
+
+    Returns:
+        none
+    """
+
+    ummg = get_required_ummg()
+    ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
+                                     'Version': '1.6.3'}
+    ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
+    ummg['GranuleUR'] = granule_name
+    ummg['ProviderDates'].append({'Date': creation_time, 'Type': "Insert"})
+    ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
+    ummg['CollectionReference'] = {
+        "ShortName": collection_name,
+        "Version": collection_version
+    },
+
+
+def dump_json(json_content: dict, filename: str):
+    """
+    Dump the dictionary to an output json file
+    Args:
+        json_content: dictionary to write out
+        filename: output filename to write to
+    """
+
+    with open(filename, errors='ignore') as fout:
+        fout.write(json.dumps(json_content, indent=2, sort_keys=False))
+
+
+def add_boundary_ummg(ummg: dict, boundary_points: list):
+    """
+    Add boundary points list to UMMG in correct format
+    Args:
+        ummg: existing UMMG to augment
+        boundary_points: list of lists, each major list entry is a pair of (lon, lat) coordinates
+
+    Returns:
+        dictionary representation of ummg
+    """
+
+    hsd = {"Geometry": {"GPolygons": [{"Boundary": {"Points": []}}]}}
+    for point in boundary_points:
+        hsd['HorizontalSpatialDomain']['Geometry']['GPolygons'][0]['Boundary']['Points'].append(
+            {'Longitude': point[0], 'Latitude': point[1]})
+
+    ummg['HorizontalSpatialDomain'] = hsd
+    return ummg
+
+
+def add_data_file_ummg(ummg: dict, data_file_name: str, format: str ='netCDF-4'):
+    """
+    Add boundary points list to UMMG in correct format
+    Args:
+        ummg: existing UMMG to augment
+        data_file_name: path to existing data file to add
+
+    Returns:
+        dictionary representation of ummg with new data granule
+    """
+
+    ummg['DataGranule'] = {
+        'ArchiveAndDistributionInformation': [{
+            "Name": os.path.basename(data_file_name),
+            "SizeInBytes": os.path.getsize(data_file_name),
+            "Format": format,
+            "Checksum": {
+                'Value': calc_checksum(data_file_name),
+                'Algorithm': 'sha512'
+            }
+        }]
+    }
+    return ummg
+
+
+
+def write_ummg(output_filename: str, ummg: dict):
+    """
+    Write UMMG file to disk
+    Args:
+        output_filename: destination to write file to
+        ummg: dictionary to write out
+
+    Returns:
+        none
+    """
+    errors = check_ummg()
+    if len(errors) > 0:
+        return errors
+
+    with open(output_filename, errors='ignore') as fout:
+        fout.write(json.dumps(ummg, indent=2, sort_keys=False))
+
+
+def check_ummg(ummg: dict):
+    """
+    Args:
+        ummg: dict to check for UMMG format
+
+    Returns:
+        error: list of errors
+
+    """
+    error_list = []
+    base_ummg = get_required_ummg()
+    for key in base_ummg.keys():
+        if key not in ummg.keys() or isinstance(type(base_ummg[key]), type(ummg[key])) is False:
+            error_list.append(f'Key {key} missing or formatted incorrectly')
+
+    return error_list
 
 
 def calc_checksum(path, hash_alg="sha512"):
