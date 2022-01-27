@@ -234,10 +234,12 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg = get_required_ummg()
     ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
                                      'Version': '1.6.3'}
-    ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
+
+    #
+    #ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
+    #ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['GranuleUR'] = granule_name
     ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
-    ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
         "Version": collection_version
@@ -314,6 +316,11 @@ def add_data_file_ummg(ummg: dict, data_file_name: str, file_format: str ='NETCD
     Returns:
         dictionary representation of ummg with new data granule
     """
+    prod_datetime_str = None
+    for subdict in ummg['ProviderDates']:
+        if subdict['Type'] == 'Insert':
+            prod_datetime_str = subdict['Date']
+            break
 
     ummg['DataGranule'] = {
         'ArchiveAndDistributionInformation': [{
@@ -326,6 +333,9 @@ def add_data_file_ummg(ummg: dict, data_file_name: str, file_format: str ='NETCD
             }
         }]
     }
+    if prod_datetime_str is not None:
+        ummg['DataGranule']['ProductionDateTime'] = prod_datetime_str
+
     return ummg
 
 
