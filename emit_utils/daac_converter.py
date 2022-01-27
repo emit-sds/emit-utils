@@ -219,7 +219,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: str, collection_name: str, collection_version: str = "001"):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str = "001"):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -236,7 +236,7 @@ def initialize_ummg(granule_name: str, creation_time: str, collection_name: str,
                                      'Version': '1.6.3'}
     ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
     ummg['GranuleUR'] = granule_name
-    ummg['ProviderDates'].append({'Date': creation_time, 'Type': "Insert"})
+    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
     ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
