@@ -219,7 +219,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: str, collection_name: str, collection_version: str = "1.0"):
+def initialize_ummg(granule_name: str, creation_time: str, collection_name: str, collection_version: str = "001"):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -287,16 +287,21 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
         hsd['HorizontalSpatialDomain']['Geometry']['GPolygons'][0]['Boundary']['Points'].append(
             {'Longitude': point[0], 'Latitude': point[1]})
 
+    # For GPolygon, add the first point again to close out
+    hsd['HorizontalSpatialDomain']['Geometry']['GPolygons'][0]['Boundary']['Points'].append(
+        {'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
+
     ummg['HorizontalSpatialDomain'] = hsd
     return ummg
 
 
-def add_data_file_ummg(ummg: dict, data_file_name: str, format: str ='netCDF-4'):
+def add_data_file_ummg(ummg: dict, data_file_name: str, file_format: str ='NETCDF-4'):
     """
     Add boundary points list to UMMG in correct format
     Args:
         ummg: existing UMMG to augment
         data_file_name: path to existing data file to add
+        file_format: description of file type
 
     Returns:
         dictionary representation of ummg with new data granule
@@ -306,15 +311,14 @@ def add_data_file_ummg(ummg: dict, data_file_name: str, format: str ='netCDF-4')
         'ArchiveAndDistributionInformation': [{
             "Name": os.path.basename(data_file_name),
             "SizeInBytes": os.path.getsize(data_file_name),
-            "Format": format,
+            "Format": file_format,
             "Checksum": {
                 'Value': calc_checksum(data_file_name),
-                'Algorithm': 'sha512'
+                'Algorithm': 'SHA-512'
             }
         }]
     }
     return ummg
-
 
 
 def write_ummg(output_filename: str, ummg: dict):
