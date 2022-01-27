@@ -245,7 +245,6 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     return ummg
 
 
-
 class SerialEncoder(json.JSONEncoder):
     """Encoder for json to help ensure json objects can be passed to the workflow manager.
     """
@@ -282,16 +281,25 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
         dictionary representation of ummg
     """
 
-    hsd = {"Geometry": {"GPolygons": [{"Boundary": {"Points": []}}]}}
+
+    formatted_points_list = []
     for point in boundary_points:
-        hsd['HorizontalSpatialDomain']['Geometry']['GPolygons'][0]['Boundary']['Points'].append(
-            {'Longitude': point[0], 'Latitude': point[1]})
+        formatted_points_list.append({'Longitude': point[0], 'Latitude': point[1]})
 
     # For GPolygon, add the first point again to close out
-    hsd['HorizontalSpatialDomain']['Geometry']['GPolygons'][0]['Boundary']['Points'].append(
-        {'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
+    formatted_points_list.append({'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
 
-    ummg['HorizontalSpatialDomain'] = hsd
+    hsd = {"HorizontalSpatialDomain":
+              [{"Geometry":
+                  {"GPolygons": [
+                      {'Boundary':
+                           {'Points': formatted_points_list}}
+                  ]}
+              }]
+          }
+
+
+    ummg['SpatialExtent'] = hsd
     return ummg
 
 
