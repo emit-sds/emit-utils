@@ -305,7 +305,7 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     return ummg
 
 
-def add_data_file_ummg(ummg: dict, data_file_name: str, file_format: str ='NETCDF-4'):
+def add_data_file_ummg(ummg: dict, data_file_name: str, daynight: str, file_format: str ='NETCDF-4'):
     """
     Add boundary points list to UMMG in correct format
     Args:
@@ -323,6 +323,7 @@ def add_data_file_ummg(ummg: dict, data_file_name: str, file_format: str ='NETCD
             break
 
     ummg['DataGranule'] = {
+        'DayNightFlag': daynight,
         'ArchiveAndDistributionInformation': [{
             "Name": os.path.basename(data_file_name),
             "SizeInBytes": os.path.getsize(data_file_name),
