@@ -4,4 +4,9 @@ _NOTE - at this time the EMIT repositories are not supporting Pull Requests from
 
 Welcome to the EMIT utils science data system repository.  To understand how this repository is linked to the rest of the emit-sds repositories, please see [the repository guide](https://github.com/emit-sds/emit-main/wiki/Repository-Guide).
 
-The emit utils repository provides general convenience utilities used broadly throughout the emit-sds.
+The emit utils repository provides general convenience utilities used broadly throughout the emit-sds.  This repository can be installed locally by:
+
+```
+git clone git@github.com:emit-sds/emit-utils.git
+pip install --editable git@github.com:emit-sds/emit-utils.git
+```
