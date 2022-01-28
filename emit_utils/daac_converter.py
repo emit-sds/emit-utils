@@ -292,12 +292,12 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     formatted_points_list.append({'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
 
     hsd = {"HorizontalSpatialDomain":
-              [{"Geometry":
+              {"Geometry":
                   {"GPolygons": [
                       {'Boundary':
                            {'Points': formatted_points_list}}
                   ]}
-              }]
+              }
           }
 
 
