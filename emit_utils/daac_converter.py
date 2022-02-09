@@ -131,18 +131,14 @@ def makeDims(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str 
     nc_ds.sync()
 
 
-def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str = None):
+def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
     """
-    Set up global attributes that are universal.  Required attributes that should be populated by individual PGEs
-    are flagged with None values
+    Set up global attributes that are universal, without any primary files.  
+    Required attributes that should be populated by individual PGEs are flagged with None values
     Args:
         nc_ds: mutable netcdf dataset to be updated
-        primary_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
-        glt_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
     Returns:
     """
-
-    primary_ds = envi.open(envi_header(primary_envi_file))
 
     # required and highly recommended
     nc_ds.ncei_template_version = "NCEI_NetCDF_Swath_Template_v2.0"  # required by cheatsheet
@@ -182,6 +178,26 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     nc_ds.identifier_product_doi_authority = "http://dx.doi.org"
 
     #nc_ds.processing_level = "XXXX TO BE UPDATED"
+
+    nc_ds.sync()  # flush
+
+
+
+
+def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str = None):
+    """
+    Set up global attributes that are universal.  Required attributes that should be populated by individual PGEs
+    are flagged with None values
+    Args:
+        nc_ds: mutable netcdf dataset to be updated
+        primary_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
+        glt_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
+    Returns:
+    """
+
+    makeGlobalAttrBase(nc_ds)
+
+    primary_ds = envi.open(envi_header(primary_envi_file))
 
     nc_ds.flight_line = os.path.basename(primary_envi_file)[:31]
 
