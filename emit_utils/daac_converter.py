@@ -53,7 +53,8 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
     kargs['fill_value'] = NODATA
 
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
-    nc_var.long_name = long_name
+    if long_name is not None:
+        nc_var.long_name = long_name
     if units is not None:
         nc_var.units = units
 
@@ -142,7 +143,6 @@ def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
 
     # required and highly recommended
     nc_ds.ncei_template_version = "NCEI_NetCDF_Swath_Template_v2.0"  # required by cheatsheet
-    nc_ds.title = "EMIT L1B At-Sensor Calibrated Radiance and Geolocation Data Swath, 72km, V001"
     nc_ds.summary = "The Earth Surface Mineral Dust Source Investigation (EMIT) is an Earth Ventures-Instrument (EVI-4) \
         Mission that maps the surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and \
         short-wave infrared (VSWIR). Installed on the International Space Station (ISS), the EMIT instrument is a Dyson \
@@ -214,6 +214,10 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
         nc_ds.westernmost_longitude = ul_lr[2]
         nc_ds.southernmost_latitude = ul_lr[3]
         nc_ds.spatialResolution = res
+
+        gdal_ds = gdal.Open(glt_envi_file)
+        nc_ds.spatial_ref = gdal_ds.GetProjection()
+        nc_ds.geotransform = gdal_ds.GetGeoTransform()
 
     nc_ds.day_night_flag = primary_ds.metadata['emit acquisition daynight']
 
