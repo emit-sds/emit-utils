@@ -38,7 +38,6 @@ def check_files_exist(file_list: np.array):
     anybad = False
     for file in file_list:
         if os.path.isfile(file) is False:
-            import ipdb; ipdb.set_trace()
             logging.error('File: {} does not exist'.format(file))
             anybad = True
 
