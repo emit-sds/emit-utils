@@ -99,10 +99,10 @@ def add_glt(nc_ds, glt_envi_file):
     """
     glt = envi.open(envi_header(glt_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/glt_x", "i4", "GLT Sample Lookup", "pixel location",
-                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x")})
+                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
 
     add_variable(nc_ds, "location/glt_y", "i4", "GLT Line Lookup", "pixel location",
-                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x")})
+                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
     nc_ds.sync()
 
 
