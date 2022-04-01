@@ -78,13 +78,13 @@ def add_loc(nc_ds, loc_envi_file):
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/lat", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
-                 {"dimensions": ("number_of_scans", "pixels_per_scan")} )
+                 {"dimensions": ("downtrack", "crosstrack")} )
 
     add_variable(nc_ds, "location/lon", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
-                 {"dimensions": ("number_of_scans", "pixels_per_scan")} )
+                 {"dimensions": ("downtrack", "crosstrack")} )
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
-                 {"dimensions": ("number_of_scans", "pixels_per_scan")} )
+                 {"dimensions": ("downtrack", "crosstrack")} )
     nc_ds.sync()
 
 
