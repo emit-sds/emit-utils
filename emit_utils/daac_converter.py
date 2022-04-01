@@ -118,9 +118,9 @@ def makeDims(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str 
     """
 
     primary_ds = envi.open(envi_header(primary_envi_file))
-    nc_ds.createDimension('number_of_scans', int(primary_ds.metadata['lines']))
-    nc_ds.createDimension('pixels_per_scan', int(primary_ds.metadata['samples']))
-    nc_ds.createDimension('number_of_bands', int(primary_ds.metadata['bands']))
+    nc_ds.createDimension('downtrack', int(primary_ds.metadata['lines']))
+    nc_ds.createDimension('crosstrack', int(primary_ds.metadata['samples']))
+    nc_ds.createDimension('bands', int(primary_ds.metadata['bands']))
 
     # Geographical Dimensions
     if glt_envi_file is not None:
