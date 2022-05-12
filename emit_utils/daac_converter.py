@@ -271,7 +271,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -279,7 +279,9 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         collection_name: short name of collection reference
         collection_version: collection version
         software_build_version: version of software build
-        pge_name_version: coupled PGE name and version from the build configuration
+        pge_name: PGE name  from build configuration
+        pge_version: PGE version from build configuration
+        cloud_fraction: rounded fraction of cloudcover if applicable
 
     Returns:
         dictionary representation of ummg
@@ -308,7 +310,9 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
 
     ummg['PGEVersionClass'] = {'PGE Name': pge_name, 'PGE Version': pge_version}
-    ummg['CloudCover'] = str(cloud_fraction)
+
+    if cloud_fraction is not None:
+        ummg['CloudCover'] = str(cloud_fraction)
 
     return ummg
 
