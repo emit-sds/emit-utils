@@ -270,7 +270,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str = "001"):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -288,7 +288,6 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
 
     
     ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
-    #ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['GranuleUR'] = granule_name
 
     ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
@@ -297,8 +296,11 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
-        "Version": collection_version
+        "Version": str(collection_version)
     }
+
+    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
+    #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
     return ummg
 
 
