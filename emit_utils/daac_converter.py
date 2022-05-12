@@ -9,18 +9,29 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 """
 #TODO - UMMG updates
 TemporalExtent - tbd
-Platforms - attempt added
-extend add_files (for multiples)
+Platforms - implemented, test to see if it breaks
+extend add_files (for multiples) - Phil to do
+Winston - extend calls in main
+
+
 related_urls:
-    - Download Software: github
-    - Algorithm Documentation : ATBD
-    - Project Home Page: EMIT website
-    - Users's Guide : User Guide
-PGEVersionClass
+    - Download Software: github # specific to Level
+    - Algorithm Documentation : ATBD # specific to Level
+    - Project Home Page: EMIT website # general
+    - Users's Guide : User Guide # specific to level
+
+Phil - add function to add link to granule
+Phil - add project home page to initialize
+Winston - add calls to emit-main
+
+PGEVersionClass - Winston to do pass in from config
 Additional Attributes:
-    - Data Product Version
-    - Software Build Version
-CloudCover
+    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
+
+Phil add name/value pair additional attrubute possibility
+    - Software Build Version - pass in padded 6 digit number, add to initial_ummg (Winston to add call to main)
+
+CloudCover - L2A PGE adds to cloudcover percentage to database from mask (phil to do).  cloudcover as optional argument to initialize (phil to do).  Add to emit-main calls (Winston to do)
 NativeProjectionNames
 """
 
@@ -279,7 +290,9 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
     #ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['GranuleUR'] = granule_name
-    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
+
+    # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
+    #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
         "Version": collection_version
@@ -345,12 +358,12 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     return ummg
 
 
-def add_data_file_ummg(ummg: dict, data_file_name: str, daynight: str, file_format: str ='NETCDF-4'):
+def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_format: str ='NETCDF-4'):
     """
     Add boundary points list to UMMG in correct format
     Args:
         ummg: existing UMMG to augment
-        data_file_name: path to existing data file to add
+        data_file_names: list of paths to existing data files to add
         file_format: description of file type
 
     Returns:
@@ -362,18 +375,23 @@ def add_data_file_ummg(ummg: dict, data_file_name: str, daynight: str, file_form
             prod_datetime_str = subdict['Date']
             break
 
+    archive_info = []
+    for filename in data_file_names:
+        archive_info.append({
+                             "Name": os.path.basename(filename),
+                             "SizeInBytes": os.path.getsize(filename),
+                             "Format": file_format,
+                             "Checksum": {
+                                 'Value': calc_checksum(filename),
+                                 'Algorithm': 'SHA-512'
+                                 }
+                            })
+
     ummg['DataGranule'] = {
         'DayNightFlag': daynight,
-        'ArchiveAndDistributionInformation': [{
-            "Name": os.path.basename(data_file_name),
-            "SizeInBytes": os.path.getsize(data_file_name),
-            "Format": file_format,
-            "Checksum": {
-                'Value': calc_checksum(data_file_name),
-                'Algorithm': 'SHA-512'
-            }
-        }]
+        'ArchiveAndDistributionInformation': archive_info
     }
+
     if prod_datetime_str is not None:
         ummg['DataGranule']['ProductionDateTime'] = prod_datetime_str
 
