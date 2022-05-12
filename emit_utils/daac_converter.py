@@ -270,7 +270,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name_version: str):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -304,7 +304,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
 
-    ummg['PGEVersionClass'] = pge_name_version
+    ummg['PGEVersionClass'] = {'PGE Name': pge_name, 'PGE Version': pge_version}
 
     return ummg
 
