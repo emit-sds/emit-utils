@@ -20,8 +20,8 @@ related_urls:
     - Project Home Page: EMIT website # general
     - Users's Guide : User Guide # specific to level
 
-Phil - add function to add link to granule
-Phil - add project home page to initialize
+X Phil - add function to add link to granule
+X Phil - add project home page to initialize
 Winston - add calls to emit-main
 
 PGEVersionClass - Winston to do pass in from config
@@ -291,12 +291,33 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     #ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['GranuleUR'] = granule_name
 
+    ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
+
     # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
     #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
         "Version": collection_version
     }
+    return ummg
+
+
+def add_related_url(ummg: dict, url: str, url_type: str, description: str) -> dict:
+    """Add an element to the related urls field.  Should follow the naming convention here:
+    https://wiki.earthdata.nasa.gov/pages/viewpage.action?pageId=138875957
+    (list of keywords here: https://gcmd.earthdata.nasa.gov/kms/concepts/concept_scheme/rucontenttype?format=csv)
+
+    Args:
+        ummg (dict): ummg to modify
+        url (str): URL to add
+        url_type (str): Type of URL being added
+        description (str): Description of URL being added
+
+    Returns:
+        dict: modified ummg
+    """
+
+    ummg['RelatedUrls'].append({'URL': url, 'Type': url_type, 'Description': description})
     return ummg
 
 
