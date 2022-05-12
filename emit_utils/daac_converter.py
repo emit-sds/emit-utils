@@ -15,16 +15,16 @@ X Winston - extend calls in main
 
 
 related_urls:
-    - DOWNLOAD SOFTWARE: github # specific to Level
+  X - DOWNLOAD SOFTWARE: github # specific to Level
   X - VIEW RELATED INFORMATION / ALGORITHM DOCUMENTATION : ATBD # specific to Level
   X - PROJECT HOME PAGE: EMIT website # general 
   X - VIEW RELATED INFORMATION / USERS'S GUIDE : User Guide # specific to level
 
 X Phil - add function to add link to granule
 X Phil - add project home page to initialize
-Winston - add calls to emit-main
+X Winston - add calls to emit-main
 
-PGEVersionClass - Winston to do pass in from config
+X PGEVersionClass - Winston to do pass in from config
              X  - Phil to add to initialize
 Additional Attributes:
 X    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
@@ -32,8 +32,8 @@ X    - Data Product Version - modify initiali_ummg call in main to reference con
 Phil add name/value pair additional attrubute possibility
 X    - Software Build Version - pass in padded 6 digit number, add to initial_ummg (Winston to add call to main)
 
-CloudCover - L2A PGE adds to cloudcover percentage to database from mask (phil to do).  cloudcover as optional argument to initialize (phil to do).  Add to emit-main calls (Winston to do)
-NativeProjectionNames
+X CloudCover - L2A PGE adds to cloudcover percentage to database from mask (phil to do).  cloudcover as optional argument to initialize (phil to do).  Add to emit-main calls (Winston to do)
+X NativeProjectionNames
 """
 
 import hashlib
