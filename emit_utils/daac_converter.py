@@ -10,7 +10,7 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 #TODO - UMMG updates
 TemporalExtent - tbd
 Platforms - implemented, test to see if it breaks
-extend add_files (for multiples) - Phil to do
+X extend add_files (for multiples) - Phil to do
 Winston - extend calls in main
 
 
@@ -358,17 +358,22 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     return ummg
 
 
-def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_format: str ='NETCDF-4'):
+def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_formats: list =['NETCDF-4']):
     """
     Add boundary points list to UMMG in correct format
     Args:
         ummg: existing UMMG to augment
         data_file_names: list of paths to existing data files to add
-        file_format: description of file type
+        file_formats: description of file types
 
     Returns:
         dictionary representation of ummg with new data granule
     """
+
+    if len(data_file_names) != len(file_formats):
+        err = f'Length of data_file_names must match length of file_formats.  Currentely lengths are: {len(data_file_names)} and {len(file_formats)}'
+        raise AttributeError(err)
+
     prod_datetime_str = None
     for subdict in ummg['ProviderDates']:
         if subdict['Type'] == 'Insert':
@@ -376,11 +381,11 @@ def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_f
             break
 
     archive_info = []
-    for filename in data_file_names:
+    for filename, fileformat in data_file_names, file_formats:
         archive_info.append({
                              "Name": os.path.basename(filename),
                              "SizeInBytes": os.path.getsize(filename),
-                             "Format": file_format,
+                             "Format": fileformat,
                              "Checksum": {
                                  'Value': calc_checksum(filename),
                                  'Algorithm': 'SHA-512'
