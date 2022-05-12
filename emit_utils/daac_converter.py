@@ -5,6 +5,25 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
          Nimrod Carmon, nimrod.carmon@jpl.nasa.gov
 """
 
+
+"""
+#TODO - UMMG updates
+TemporalExtent - tbd
+Platforms - attempt added
+extend add_files (for multiples)
+related_urls:
+    - Download Software: github
+    - Algorithm Documentation : ATBD
+    - Project Home Page: EMIT website
+    - Users's Guide : User Guide
+PGEVersionClass
+Additional Attributes:
+    - Data Product Version
+    - Software Build Version
+CloudCover
+NativeProjectionNames
+"""
+
 import hashlib
 import netCDF4
 import os
@@ -203,7 +222,8 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
 
     nc_ds.time_coverage_start = primary_ds.metadata['emit acquisition start time']
     nc_ds.time_coverage_end = primary_ds.metadata['emit acquisition stop time']
-    nc_ds.product_version = primary_ds.metadata['emit software build version']
+    nc_ds.software_build_version = primary_ds.metadata['emit software build version']
+    nc_ds.product_version = primary_ds.metadata['emit data product version']
     nc_ds.history = "PGE Input files: " + ", ".join(primary_ds.metadata['emit pge input files'])
 
     # only include spatial information if provided (may not be available for all PGEs)
@@ -255,8 +275,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
                                      'Version': '1.6.3'}
 
-    #
-    #ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
+    
+    ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
     #ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
     ummg['GranuleUR'] = granule_name
     ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
