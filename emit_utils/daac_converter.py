@@ -15,16 +15,17 @@ X Winston - extend calls in main
 
 
 related_urls:
-    - Download Software: github # specific to Level
-    - Algorithm Documentation : ATBD # specific to Level
-    - Project Home Page: EMIT website # general
-    - Users's Guide : User Guide # specific to level
+    - DOWNLOAD SOFTWARE: github # specific to Level
+    - VIEW RELATED INFORMATION / ALGORITHM DOCUMENTATION : ATBD # specific to Level
+  X - PROJECT HOME PAGE: EMIT website # general 
+    - VIEW RELATED INFORMATION / USERS'S GUIDE : User Guide # specific to level
 
 X Phil - add function to add link to granule
 X Phil - add project home page to initialize
 Winston - add calls to emit-main
 
 PGEVersionClass - Winston to do pass in from config
+             X  - Phil to add to initialize
 Additional Attributes:
 X    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
 
@@ -309,7 +310,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     return ummg
 
 
-def add_related_url(ummg: dict, url: str, url_type: str, description: str) -> dict:
+def add_related_url(ummg: dict, url: str, url_type: str, description: str = None, url_subtype: str = None) -> dict:
     """Add an element to the related urls field.  Should follow the naming convention here:
     https://wiki.earthdata.nasa.gov/pages/viewpage.action?pageId=138875957
     (list of keywords here: https://gcmd.earthdata.nasa.gov/kms/concepts/concept_scheme/rucontenttype?format=csv)
@@ -319,12 +320,20 @@ def add_related_url(ummg: dict, url: str, url_type: str, description: str) -> di
         url (str): URL to add
         url_type (str): Type of URL being added
         description (str): Description of URL being added
+        url_subtype (str): SubType of URL being added
 
     Returns:
         dict: modified ummg
     """
 
-    ummg['RelatedUrls'].append({'URL': url, 'Type': url_type, 'Description': description})
+    output_dict = {'URL': url, 'Type': url_type, 'Description': description}
+    if description is not None:
+        output_dict['Description'] = description
+    
+    if url_subtype is not None:
+        output_dict['Subtype'] = url_subtype
+
+    ummg['RelatedUrls'].append(output_dict)
     return ummg
 
 
