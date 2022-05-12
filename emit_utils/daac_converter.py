@@ -11,7 +11,7 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 TemporalExtent - tbd
 Platforms - implemented, test to see if it breaks
 X extend add_files (for multiples) - Phil to do
-Winston - extend calls in main
+X Winston - extend calls in main
 
 
 related_urls:
@@ -26,10 +26,10 @@ Winston - add calls to emit-main
 
 PGEVersionClass - Winston to do pass in from config
 Additional Attributes:
-    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
+X    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
 
 Phil add name/value pair additional attrubute possibility
-    - Software Build Version - pass in padded 6 digit number, add to initial_ummg (Winston to add call to main)
+X    - Software Build Version - pass in padded 6 digit number, add to initial_ummg (Winston to add call to main)
 
 CloudCover - L2A PGE adds to cloudcover percentage to database from mask (phil to do).  cloudcover as optional argument to initialize (phil to do).  Add to emit-main calls (Winston to do)
 NativeProjectionNames
@@ -270,7 +270,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name_version: str):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -278,6 +278,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         collection_name: short name of collection reference
         collection_version: collection version
         software_build_version: version of software build
+        pge_name_version: coupled PGE name and version from the build configuration
 
     Returns:
         dictionary representation of ummg
@@ -302,6 +303,9 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
 
     ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
+
+    ummg['PGEVersionClass'] = pge_name_version
+
     return ummg
 
 
