@@ -16,9 +16,9 @@ X Winston - extend calls in main
 
 related_urls:
     - DOWNLOAD SOFTWARE: github # specific to Level
-    - VIEW RELATED INFORMATION / ALGORITHM DOCUMENTATION : ATBD # specific to Level
+  X - VIEW RELATED INFORMATION / ALGORITHM DOCUMENTATION : ATBD # specific to Level
   X - PROJECT HOME PAGE: EMIT website # general 
-    - VIEW RELATED INFORMATION / USERS'S GUIDE : User Guide # specific to level
+  X - VIEW RELATED INFORMATION / USERS'S GUIDE : User Guide # specific to level
 
 X Phil - add function to add link to granule
 X Phil - add project home page to initialize
@@ -271,7 +271,7 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -294,6 +294,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['GranuleUR'] = granule_name
 
     ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
+    ummg = add_related_url('https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION', 'Link to Algorithm Theoretical Basis Documents', 'ALGORITHM DOCUMENTATION')
+    ummg = add_related_url('https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION', 'Link to Data User\'s Guide', 'USER\'s GUIDE')
 
     # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
     #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
@@ -306,6 +308,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
 
     ummg['PGEVersionClass'] = {'PGE Name': pge_name, 'PGE Version': pge_version}
+    ummg['CloudCover'] = str(cloud_fraction)
 
     return ummg
 
