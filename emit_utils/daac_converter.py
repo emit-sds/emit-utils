@@ -277,6 +277,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         creation_time: creation timestamp
         collection_name: short name of collection reference
         collection_version: collection version
+        software_build_version: version of software build
 
     Returns:
         dictionary representation of ummg
