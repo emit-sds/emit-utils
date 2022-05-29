@@ -10,6 +10,25 @@ import logging
 import numpy as np
 from spectral.io import envi
 
+
+def check_cloudfraction(mask_file: str, mask_band=7) -> float:
+    """
+    Determines the cloud fraction from a mask file
+
+    Args:
+        mask_file (str): mask file (EMIT style)
+        mask_band (int, optional): Band number to estimate clouds from.
+
+    Returns:
+        float: cloud fraction
+    """
+    ds = envi.open(envi_header(mask_file))
+    clouds = ds.open_memmap(interleave='bip').open_memmap()[...,mask_band]
+    
+    fraction = np.sum(clouds > 0) / np.product(clouds.shape)
+    return int(np.round(fraction))
+
+
 def check_daynight(obs_file: str, zenith_band=4):
     """
     Determine if an acquisition is from daytime or nighttime

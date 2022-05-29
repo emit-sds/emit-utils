@@ -5,6 +5,37 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
          Nimrod Carmon, nimrod.carmon@jpl.nasa.gov
 """
 
+
+"""
+#TODO - UMMG updates
+TemporalExtent - tbd
+Platforms - implemented, test to see if it breaks
+X extend add_files (for multiples) - Phil to do
+X Winston - extend calls in main
+
+
+related_urls:
+  X - DOWNLOAD SOFTWARE: github # specific to Level
+  X - VIEW RELATED INFORMATION / ALGORITHM DOCUMENTATION : ATBD # specific to Level
+  X - PROJECT HOME PAGE: EMIT website # general 
+  X - VIEW RELATED INFORMATION / USERS'S GUIDE : User Guide # specific to level
+
+X Phil - add function to add link to granule
+X Phil - add project home page to initialize
+X Winston - add calls to emit-main
+
+X PGEVersionClass - Winston to do pass in from config
+             X  - Phil to add to initialize
+Additional Attributes:
+X    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
+
+Phil add name/value pair additional attrubute possibility
+X    - Software Build Version - pass in padded 6 digit number, add to initial_ummg (Winston to add call to main)
+
+X CloudCover - L2A PGE adds to cloudcover percentage to database from mask (phil to do).  cloudcover as optional argument to initialize (phil to do).  Add to emit-main calls (Winston to do)
+X NativeProjectionNames
+"""
+
 import hashlib
 import netCDF4
 import os
@@ -203,7 +234,8 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
 
     nc_ds.time_coverage_start = primary_ds.metadata['emit acquisition start time']
     nc_ds.time_coverage_end = primary_ds.metadata['emit acquisition stop time']
-    nc_ds.product_version = primary_ds.metadata['emit software build version']
+    nc_ds.software_build_version = primary_ds.metadata['emit software build version']
+    nc_ds.product_version = primary_ds.metadata['emit data product version']
     nc_ds.history = "PGE Input files: " + ", ".join(primary_ds.metadata['emit pge input files'])
 
     # only include spatial information if provided (may not be available for all PGEs)
@@ -239,13 +271,17 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str = "001"):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
         creation_time: creation timestamp
         collection_name: short name of collection reference
         collection_version: collection version
+        software_build_version: version of software build
+        pge_name: PGE name  from build configuration
+        pge_version: PGE version from build configuration
+        cloud_fraction: rounded fraction of cloudcover if applicable
 
     Returns:
         dictionary representation of ummg
@@ -255,15 +291,56 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
                                      'Version': '1.6.3'}
 
-    #
-    #ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
-    #ummg['AdditionalAttributes'] = [{'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]}]
+    
+    ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
     ummg['GranuleUR'] = granule_name
-    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
+
+    ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
+    ummg = add_related_url('https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION', 'Link to Algorithm Theoretical Basis Documents', 'ALGORITHM DOCUMENTATION')
+    ummg = add_related_url('https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION', 'Link to Data User\'s Guide', 'USER\'s GUIDE')
+
+    # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
+    #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
-        "Version": collection_version
+        "Version": str(collection_version)
     }
+
+    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
+    #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
+
+    ummg['PGEVersionClass'] = {'PGE Name': pge_name, 'PGE Version': pge_version}
+
+    if cloud_fraction is not None:
+        ummg['CloudCover'] = str(cloud_fraction)
+
+    return ummg
+
+
+def add_related_url(ummg: dict, url: str, url_type: str, description: str = None, url_subtype: str = None) -> dict:
+    """Add an element to the related urls field.  Should follow the naming convention here:
+    https://wiki.earthdata.nasa.gov/pages/viewpage.action?pageId=138875957
+    (list of keywords here: https://gcmd.earthdata.nasa.gov/kms/concepts/concept_scheme/rucontenttype?format=csv)
+
+    Args:
+        ummg (dict): ummg to modify
+        url (str): URL to add
+        url_type (str): Type of URL being added
+        description (str): Description of URL being added
+        url_subtype (str): SubType of URL being added
+
+    Returns:
+        dict: modified ummg
+    """
+
+    output_dict = {'URL': url, 'Type': url_type, 'Description': description}
+    if description is not None:
+        output_dict['Description'] = description
+    
+    if url_subtype is not None:
+        output_dict['Subtype'] = url_subtype
+
+    ummg['RelatedUrls'].append(output_dict)
     return ummg
 
 
@@ -325,35 +402,45 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     return ummg
 
 
-def add_data_file_ummg(ummg: dict, data_file_name: str, daynight: str, file_format: str ='NETCDF-4'):
+def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_formats: list =['NETCDF-4']):
     """
     Add boundary points list to UMMG in correct format
     Args:
         ummg: existing UMMG to augment
-        data_file_name: path to existing data file to add
-        file_format: description of file type
+        data_file_names: list of paths to existing data files to add
+        file_formats: description of file types
 
     Returns:
         dictionary representation of ummg with new data granule
     """
+
+    if len(data_file_names) != len(file_formats):
+        err = f'Length of data_file_names must match length of file_formats.  Currentely lengths are: {len(data_file_names)} and {len(file_formats)}'
+        raise AttributeError(err)
+
     prod_datetime_str = None
     for subdict in ummg['ProviderDates']:
         if subdict['Type'] == 'Insert':
             prod_datetime_str = subdict['Date']
             break
 
+    archive_info = []
+    for filename, fileformat in data_file_names, file_formats:
+        archive_info.append({
+                             "Name": os.path.basename(filename),
+                             "SizeInBytes": os.path.getsize(filename),
+                             "Format": fileformat,
+                             "Checksum": {
+                                 'Value': calc_checksum(filename),
+                                 'Algorithm': 'SHA-512'
+                                 }
+                            })
+
     ummg['DataGranule'] = {
         'DayNightFlag': daynight,
-        'ArchiveAndDistributionInformation': [{
-            "Name": os.path.basename(data_file_name),
-            "SizeInBytes": os.path.getsize(data_file_name),
-            "Format": file_format,
-            "Checksum": {
-                'Value': calc_checksum(data_file_name),
-                'Algorithm': 'SHA-512'
-            }
-        }]
+        'ArchiveAndDistributionInformation': archive_info
     }
+
     if prod_datetime_str is not None:
         ummg['DataGranule']['ProductionDateTime'] = prod_datetime_str
 
