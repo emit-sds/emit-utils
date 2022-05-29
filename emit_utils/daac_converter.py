@@ -296,8 +296,10 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['GranuleUR'] = granule_name
 
     ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
-    ummg = add_related_url('https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION', 'Link to Algorithm Theoretical Basis Documents', 'ALGORITHM DOCUMENTATION')
-    ummg = add_related_url('https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION', 'Link to Data User\'s Guide', 'USER\'s GUIDE')
+    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+                           description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
+    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+                           description='Link to Data User\'s Guide', url_subtype='USER\'s GUIDE')
 
     # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
     #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
@@ -333,7 +335,7 @@ def add_related_url(ummg: dict, url: str, url_type: str, description: str = None
         dict: modified ummg
     """
 
-    output_dict = {'URL': url, 'Type': url_type, 'Description': description}
+    output_dict = {'URL': url, 'Type': url_type}
     if description is not None:
         output_dict['Description'] = description
     
