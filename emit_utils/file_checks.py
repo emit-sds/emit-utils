@@ -20,12 +20,12 @@ def check_cloudfraction(mask_file: str, mask_band=7) -> float:
         mask_band (int, optional): Band number to estimate clouds from.
 
     Returns:
-        float: cloud fraction
+        float: cloud fraction as rounded percent (0-100)
     """
     ds = envi.open(envi_header(mask_file))
     clouds = ds.open_memmap(interleave='bip').open_memmap()[...,mask_band]
     
-    fraction = np.sum(clouds > 0) / np.product(clouds.shape)
+    fraction = np.sum(clouds > 0) * 100 / np.product(clouds.shape) 
     return int(np.round(fraction))
 
 
