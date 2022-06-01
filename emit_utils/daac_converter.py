@@ -292,7 +292,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
                                      'Version': '1.6.3'}
 
     
-    ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT'}]}]
+    ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT Imaging Spectrometer'}]}]
     ummg['GranuleUR'] = granule_name
 
     ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
@@ -302,7 +302,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
                            description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
 
     # Use ProviderDate type "Insert" seems to be required. Use this for data granule ProductionDateTime field too.
-    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
+    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Update"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
         "Version": str(collection_version)
@@ -422,7 +422,7 @@ def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_f
 
     prod_datetime_str = None
     for subdict in ummg['ProviderDates']:
-        if subdict['Type'] == 'Insert':
+        if subdict['Type'] == 'Update':
             prod_datetime_str = subdict['Date']
             break
 
