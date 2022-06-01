@@ -301,7 +301,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
                            description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
 
-    # Use ProviderDate type "Insert" seems to be required. Use this for data granule ProductionDateTime field too.
+    # Use ProviderDate type "Update" per DAAC. Use this for data granule ProductionDateTime field too.
     ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Update"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
