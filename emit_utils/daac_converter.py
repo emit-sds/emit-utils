@@ -292,14 +292,14 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
                                      'Version': '1.6.3'}
 
     
-    ummg['Platforms'] = {'ShortName': 'ISS', 'Instruments': {'ShortName': 'EMIT'} }
+    ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT'}]}]
     ummg['GranuleUR'] = granule_name
 
     ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
     ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
                            description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
     ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
-                           description='Link to Data User\'s Guide', url_subtype='USER\'s GUIDE')
+                           description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
 
     # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
     #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
@@ -311,7 +311,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
 
-    ummg['PGEVersionClass'] = {'PGE Name': pge_name, 'PGE Version': pge_version}
+    ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
 
     if cloud_fraction is not None:
         ummg['CloudCover'] = str(cloud_fraction)
@@ -427,7 +427,7 @@ def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_f
             break
 
     archive_info = []
-    for filename, fileformat in data_file_names, file_formats:
+    for filename, fileformat in zip(data_file_names, file_formats):
         archive_info.append({
                              "Name": os.path.basename(filename),
                              "SizeInBytes": os.path.getsize(filename),
