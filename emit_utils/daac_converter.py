@@ -301,8 +301,9 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
                            description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
 
-    # Removing on advice of LPDAAC, if this causes a failure on ingestion, re-add, and DAAC will update
-    #ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Insert"})
+    # Use ProviderDate type "Update" per DAAC's request. This field is required for ingest. Use this for data granule
+    # ProductionDateTime field too
+    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Update"})
     ummg['CollectionReference'] = {
         "ShortName": collection_name,
         "Version": str(collection_version)
@@ -422,7 +423,7 @@ def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_f
 
     prod_datetime_str = None
     for subdict in ummg['ProviderDates']:
-        if subdict['Type'] == 'Insert':
+        if subdict['Type'] == 'Update':
             prod_datetime_str = subdict['Date']
             break
 
