@@ -314,7 +314,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
 
     if cloud_fraction is not None:
-        ummg['CloudCover'] = str(cloud_fraction)
+        ummg['CloudCover'] = int(cloud_fraction)
 
     return ummg
 
