@@ -5,6 +5,37 @@ Authors: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
          Nimrod Carmon, nimrod.carmon@jpl.nasa.gov
 """
 
+
+"""
+#TODO - UMMG updates
+TemporalExtent - tbd
+Platforms - implemented, test to see if it breaks
+X extend add_files (for multiples) - Phil to do
+X Winston - extend calls in main
+
+
+related_urls:
+  X - DOWNLOAD SOFTWARE: github # specific to Level
+  X - VIEW RELATED INFORMATION / ALGORITHM DOCUMENTATION : ATBD # specific to Level
+  X - PROJECT HOME PAGE: EMIT website # general 
+  X - VIEW RELATED INFORMATION / USERS'S GUIDE : User Guide # specific to level
+
+X Phil - add function to add link to granule
+X Phil - add project home page to initialize
+X Winston - add calls to emit-main
+
+X PGEVersionClass - Winston to do pass in from config
+             X  - Phil to add to initialize
+Additional Attributes:
+X    - Data Product Version - modify initiali_ummg call in main to reference config - prepend 0
+
+Phil add name/value pair additional attrubute possibility
+X    - Software Build Version - pass in padded 6 digit number, add to initial_ummg (Winston to add call to main)
+
+X CloudCover - L2A PGE adds to cloudcover percentage to database from mask (phil to do).  cloudcover as optional argument to initialize (phil to do).  Add to emit-main calls (Winston to do)
+X NativeProjectionNames
+"""
+
 import hashlib
 import netCDF4
 import os
@@ -13,6 +44,8 @@ from datetime import datetime, timedelta
 from osgeo import gdal, osr
 from spectral.io import envi
 from typing import List
+import json
+import numpy as np
 
 from emit_utils.file_checks import envi_header
 
@@ -51,7 +84,8 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
     kargs['fill_value'] = NODATA
 
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
-    nc_var.long_name = long_name
+    if long_name is not None:
+        nc_var.long_name = long_name
     if units is not None:
         nc_var.units = units
 
@@ -75,13 +109,13 @@ def add_loc(nc_ds, loc_envi_file):
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/lat", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
-                 {"dimensions": ("number_of_scans", "pixels_per_scan")} )
+                 {"dimensions": ("downtrack", "crosstrack")} )
 
     add_variable(nc_ds, "location/lon", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
-                 {"dimensions": ("number_of_scans", "pixels_per_scan")} )
+                 {"dimensions": ("downtrack", "crosstrack")} )
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
-                 {"dimensions": ("number_of_scans", "pixels_per_scan")} )
+                 {"dimensions": ("downtrack", "crosstrack")} )
     nc_ds.sync()
 
 
@@ -96,10 +130,10 @@ def add_glt(nc_ds, glt_envi_file):
     """
     glt = envi.open(envi_header(glt_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/glt_x", "i4", "GLT Sample Lookup", "pixel location",
-                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x")})
+                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
 
     add_variable(nc_ds, "location/glt_y", "i4", "GLT Line Lookup", "pixel location",
-                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x")})
+                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
     nc_ds.sync()
 
 
@@ -115,9 +149,9 @@ def makeDims(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str 
     """
 
     primary_ds = envi.open(envi_header(primary_envi_file))
-    nc_ds.createDimension('number_of_scans', int(primary_ds.metadata['lines']))
-    nc_ds.createDimension('pixels_per_scan', int(primary_ds.metadata['samples']))
-    nc_ds.createDimension('number_of_bands', int(primary_ds.metadata['bands']))
+    nc_ds.createDimension('downtrack', int(primary_ds.metadata['lines']))
+    nc_ds.createDimension('crosstrack', int(primary_ds.metadata['samples']))
+    nc_ds.createDimension('bands', int(primary_ds.metadata['bands']))
 
     # Geographical Dimensions
     if glt_envi_file is not None:
@@ -129,22 +163,17 @@ def makeDims(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str 
     nc_ds.sync()
 
 
-def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str = None):
+def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
     """
-    Set up global attributes that are universal.  Required attributes that should be populated by individual PGEs
-    are flagged with None values
+    Set up global attributes that are universal, without any primary files.  
+    Required attributes that should be populated by individual PGEs are flagged with None values
     Args:
         nc_ds: mutable netcdf dataset to be updated
-        primary_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
-        glt_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
     Returns:
     """
 
-    primary_ds = envi.open(envi_header(primary_envi_file))
-
     # required and highly recommended
     nc_ds.ncei_template_version = "NCEI_NetCDF_Swath_Template_v2.0"  # required by cheatsheet
-    nc_ds.title = "EMIT L1B At-Sensor Calibrated Radiance and Geolocation Data Swath, 72km, V001"
     nc_ds.summary = "The Earth Surface Mineral Dust Source Investigation (EMIT) is an Earth Ventures-Instrument (EVI-4) \
         Mission that maps the surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and \
         short-wave infrared (VSWIR). Installed on the International Space Station (ISS), the EMIT instrument is a Dyson \
@@ -181,11 +210,32 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
 
     #nc_ds.processing_level = "XXXX TO BE UPDATED"
 
+    nc_ds.sync()  # flush
+
+
+
+
+def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str = None):
+    """
+    Set up global attributes that are universal.  Required attributes that should be populated by individual PGEs
+    are flagged with None values
+    Args:
+        nc_ds: mutable netcdf dataset to be updated
+        primary_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
+        glt_envi_file: envi dataset (bil, bip, or bsq format) that can be read for key metadata
+    Returns:
+    """
+
+    makeGlobalAttrBase(nc_ds)
+
+    primary_ds = envi.open(envi_header(primary_envi_file))
+
     nc_ds.flight_line = os.path.basename(primary_envi_file)[:31]
 
     nc_ds.time_coverage_start = primary_ds.metadata['emit acquisition start time']
     nc_ds.time_coverage_end = primary_ds.metadata['emit acquisition stop time']
-    nc_ds.product_version = primary_ds.metadata['emit software build version']
+    nc_ds.software_build_version = primary_ds.metadata['emit software build version']
+    nc_ds.product_version = primary_ds.metadata['emit data product version']
     nc_ds.history = "PGE Input files: " + ", ".join(primary_ds.metadata['emit pge input files'])
 
     # only include spatial information if provided (may not be available for all PGEs)
@@ -197,9 +247,242 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
         nc_ds.southernmost_latitude = ul_lr[3]
         nc_ds.spatialResolution = res
 
+        gdal_ds = gdal.Open(glt_envi_file)
+        nc_ds.spatial_ref = gdal_ds.GetProjection()
+        nc_ds.geotransform = gdal_ds.GetGeoTransform()
+
     nc_ds.day_night_flag = primary_ds.metadata['emit acquisition daynight']
 
     nc_ds.sync()  # flush
+
+
+def get_required_ummg():
+    """ Get the required UMMG base dictionary
+
+    Returns:
+        ummg: dictionary with required parameters
+
+    """
+    ummg = {}
+    ummg['MetadataSpecification'] = {}
+    ummg['GranuleUR'] = ''
+    ummg['ProviderDates'] = []
+    ummg['CollectionReference'] = ''
+    return ummg
+
+
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str = None):
+    """ Initialize a UMMG metadata output file
+    Args:
+        granule_name: granule UR tag
+        creation_time: creation timestamp
+        collection_name: short name of collection reference
+        collection_version: collection version
+        software_build_version: version of software build
+        pge_name: PGE name  from build configuration
+        pge_version: PGE version from build configuration
+        cloud_fraction: rounded fraction of cloudcover if applicable
+
+    Returns:
+        dictionary representation of ummg
+    """
+
+    ummg = get_required_ummg()
+    ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
+                                     'Version': '1.6.3'}
+
+    
+    ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT Imaging Spectrometer'}]}]
+    ummg['GranuleUR'] = granule_name
+
+    ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
+    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+                           description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
+    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+                           description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
+
+    # Use ProviderDate type "Update" per DAAC. Use this for data granule ProductionDateTime field too.
+    ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Update"})
+    ummg['CollectionReference'] = {
+        "ShortName": collection_name,
+        "Version": str(collection_version)
+    }
+
+    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
+    #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
+
+    ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
+
+    if cloud_fraction is not None:
+        ummg['CloudCover'] = int(cloud_fraction)
+
+    return ummg
+
+
+def add_related_url(ummg: dict, url: str, url_type: str, description: str = None, url_subtype: str = None) -> dict:
+    """Add an element to the related urls field.  Should follow the naming convention here:
+    https://wiki.earthdata.nasa.gov/pages/viewpage.action?pageId=138875957
+    (list of keywords here: https://gcmd.earthdata.nasa.gov/kms/concepts/concept_scheme/rucontenttype?format=csv)
+
+    Args:
+        ummg (dict): ummg to modify
+        url (str): URL to add
+        url_type (str): Type of URL being added
+        description (str): Description of URL being added
+        url_subtype (str): SubType of URL being added
+
+    Returns:
+        dict: modified ummg
+    """
+
+    output_dict = {'URL': url, 'Type': url_type}
+    if description is not None:
+        output_dict['Description'] = description
+    
+    if url_subtype is not None:
+        output_dict['Subtype'] = url_subtype
+
+    ummg['RelatedUrls'].append(output_dict)
+    return ummg
+
+
+class SerialEncoder(json.JSONEncoder):
+    """Encoder for json to help ensure json objects can be passed to the workflow manager.
+    """
+
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        else:
+            return super(SerialEncoder, self).default(obj)
+
+
+def dump_json(json_content: dict, filename: str):
+    """
+    Dump the dictionary to an output json file
+    Args:
+        json_content: dictionary to write out
+        filename: output filename to write to
+    """
+
+    with open(filename, 'w', errors='ignore') as fout:
+        fout.write(json.dumps(json_content, indent=2, sort_keys=False, cls=SerialEncoder))
+
+
+def add_boundary_ummg(ummg: dict, boundary_points: list):
+    """
+    Add boundary points list to UMMG in correct format
+    Args:
+        ummg: existing UMMG to augment
+        boundary_points: list of lists, each major list entry is a pair of (lon, lat) coordinates
+
+    Returns:
+        dictionary representation of ummg
+    """
+
+
+    formatted_points_list = []
+    for point in boundary_points:
+        formatted_points_list.append({'Longitude': point[0], 'Latitude': point[1]})
+
+    # For GPolygon, add the first point again to close out
+    formatted_points_list.append({'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
+
+    hsd = {"HorizontalSpatialDomain":
+              {"Geometry":
+                  {"GPolygons": [
+                      {'Boundary':
+                           {'Points': formatted_points_list}}
+                  ]}
+              }
+          }
+
+
+    ummg['SpatialExtent'] = hsd
+    return ummg
+
+
+def add_data_files_ummg(ummg: dict, data_file_names: list, daynight: str, file_formats: list =['NETCDF-4']):
+    """
+    Add boundary points list to UMMG in correct format
+    Args:
+        ummg: existing UMMG to augment
+        data_file_names: list of paths to existing data files to add
+        file_formats: description of file types
+
+    Returns:
+        dictionary representation of ummg with new data granule
+    """
+
+    if len(data_file_names) != len(file_formats):
+        err = f'Length of data_file_names must match length of file_formats.  Currentely lengths are: {len(data_file_names)} and {len(file_formats)}'
+        raise AttributeError(err)
+
+    prod_datetime_str = None
+    for subdict in ummg['ProviderDates']:
+        if subdict['Type'] == 'Update':
+            prod_datetime_str = subdict['Date']
+            break
+
+    archive_info = []
+    for filename, fileformat in zip(data_file_names, file_formats):
+        archive_info.append({
+                             "Name": os.path.basename(filename),
+                             "SizeInBytes": os.path.getsize(filename),
+                             "Format": fileformat,
+                             "Checksum": {
+                                 'Value': calc_checksum(filename),
+                                 'Algorithm': 'SHA-512'
+                                 }
+                            })
+
+    ummg['DataGranule'] = {
+        'DayNightFlag': daynight,
+        'ArchiveAndDistributionInformation': archive_info
+    }
+
+    if prod_datetime_str is not None:
+        ummg['DataGranule']['ProductionDateTime'] = prod_datetime_str
+
+    return ummg
+
+
+def write_ummg(output_filename: str, ummg: dict):
+    """
+    Write UMMG file to disk
+    Args:
+        output_filename: destination to write file to
+        ummg: dictionary to write out
+
+    Returns:
+        none
+    """
+    errors = check_ummg()
+    if len(errors) > 0:
+        return errors
+
+    with open(output_filename, errors='ignore') as fout:
+        fout.write(json.dumps(ummg, indent=2, sort_keys=False))
+
+
+def check_ummg(ummg: dict):
+    """
+    Args:
+        ummg: dict to check for UMMG format
+
+    Returns:
+        error: list of errors
+
+    """
+    error_list = []
+    base_ummg = get_required_ummg()
+    for key in base_ummg.keys():
+        if key not in ummg.keys() or isinstance(type(base_ummg[key]), type(ummg[key])) is False:
+            error_list.append(f'Key {key} missing or formatted incorrectly')
+
+    return error_list
 
 
 def calc_checksum(path, hash_alg="sha512"):

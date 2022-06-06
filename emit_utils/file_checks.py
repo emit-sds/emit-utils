@@ -10,6 +10,25 @@ import logging
 import numpy as np
 from spectral.io import envi
 
+
+def check_cloudfraction(mask_file: str, mask_band=7) -> float:
+    """
+    Determines the cloud fraction from a mask file
+
+    Args:
+        mask_file (str): mask file (EMIT style)
+        mask_band (int, optional): Band number to estimate clouds from.
+
+    Returns:
+        float: cloud fraction as rounded percent (0-100)
+    """
+    ds = envi.open(envi_header(mask_file))
+    clouds = ds.open_memmap(interleave='bip')[...,mask_band]
+    
+    fraction = np.sum(clouds > 0) * 100 / np.product(clouds.shape) 
+    return int(np.round(fraction))
+
+
 def check_daynight(obs_file: str, zenith_band=4):
     """
     Determine if an acquisition is from daytime or nighttime
@@ -38,7 +57,6 @@ def check_files_exist(file_list: np.array):
     anybad = False
     for file in file_list:
         if os.path.isfile(file) is False:
-            import ipdb; ipdb.set_trace()
             logging.error('File: {} does not exist'.format(file))
             anybad = True
 
