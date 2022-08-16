@@ -272,10 +272,11 @@ def get_required_ummg():
 
 
 def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str,
-                    start_time: str, stop_time: str, software_build_version: str, pge_name: str, pge_version: str,
-                    orbit: int = None, scene: int = None, solar_zenith: float = None, solar_azimuth: float = None,
-                    water_vapor: float = None, aod: float = None, mean_fractional_cover: float = None,
-                    mean_spectral_abundance: float = None, cloud_fraction: str = None):
+                    start_time: datetime, stop_time: datetime, software_build_version: str, pge_name: str,
+                    pge_version: str, orbit: int = None, scene: int = None, solar_zenith: float = None,
+                    solar_azimuth: float = None, water_vapor: float = None, aod: float = None,
+                    mean_fractional_cover: float = None, mean_spectral_abundance: float = None,
+                    cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -301,8 +302,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
 
     ummg['TemporalExtent'] = {
         'RangeDateTime': {
-            'BeginningDateTime': start_time,
-            'EndingDateTime': stop_time,
+            'BeginningDateTime': start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'EndingDateTime': stop_time.strftime("%Y-%m-%dT%H:%M:%SZ")
         }
     }
 
@@ -399,6 +400,16 @@ def dump_json(json_content: dict, filename: str):
 
     with open(filename, 'w', errors='ignore') as fout:
         fout.write(json.dumps(json_content, indent=2, sort_keys=False, cls=SerialEncoder))
+
+
+def get_gring_boundary_points(glt_hdr_path: str):
+    hdr = envi.read_envi_header(glt_hdr_path)
+    # Assume the gring list starts with "Geographic Lon/Lat" followed by pairs of lon/lat
+    gring = hdr["gring"]
+    points = []
+    for i in range(1, len(gring), 2):
+        points.append([gring[i], gring[i + 1]])
+    return points
 
 
 def add_boundary_ummg(ummg: dict, boundary_points: list):
