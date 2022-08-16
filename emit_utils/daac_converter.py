@@ -271,7 +271,11 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str = None):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str,
+                    start_time: str, stop_time: str, software_build_version: str, pge_name: str, pge_version: str,
+                    orbit: int = None, scene: int = None, solar_zenith: float = None, solar_azimuth: float = None,
+                    water_vapor: float = None, aod: float = None, mean_fractional_cover: float = None,
+                    mean_spectral_abundance: float = None, cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -295,11 +299,19 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT Imaging Spectrometer'}]}]
     ummg['GranuleUR'] = granule_name
 
-    ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
-    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
-                           description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
-    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
-                           description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
+    ummg['TemporalExtent'] = {
+        'RangeDateTime': {
+            'BeginningDateTime': start_time,
+            'EndingDateTime': stop_time,
+        }
+    }
+
+    # As of 8/16/22 we are expecting related urls to either be in the collection metadata or inserted by the DAAC
+    # ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
+    # ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+    #                        description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
+    # ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+    #                        description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
 
     # Use ProviderDate type "Update" per DAAC. Use this for data granule ProductionDateTime field too.
     ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Update"})
@@ -308,7 +320,26 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         "Version": str(collection_version)
     }
 
-    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
+    # First attribute is required and others may be optional
+    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Value': str(software_build_version)}]
+    if orbit:
+        ummg['AdditionalAttributes'].append({'Name': 'ORBIT_NUMBER', 'Value': str(orbit)})
+    if scene:
+        ummg['AdditionalAttributes'].append({'Name': 'SCENE_IN_ORBIT_NUMBER', 'Value': str(scene)})
+    if solar_zenith:
+        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_ZENITH', 'Value': f"{solar_zenith:.2f}"})
+    if solar_azimuth:
+        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_AZIMUTH', 'Value': f"{solar_azimuth:.2f}"})
+    if water_vapor:
+        ummg['AdditionalAttributes'].append({'Name': 'WATER_VAPOR', 'Value': f"{water_vapor:.2f}"})
+    if aod :
+        ummg['AdditionalAttributes'].append({'Name': 'AEROSOL_OPTICAL_DEPTH', 'Value': f"{aod:.2f}"})
+    if mean_fractional_cover:
+        ummg['AdditionalAttributes'].append({'Name': 'MEAN_FRACTIONAL_COVER', 'Value': f"{mean_fractional_cover:.2f}"})
+    if mean_spectral_abundance:
+        ummg['AdditionalAttributes'].append({'Name': 'MEAN_SPECTRAL_ABUNDANCE', 'Value': f"{mean_spectral_abundance:.2f}"})
+
+
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
 
     ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
@@ -317,7 +348,6 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         ummg['CloudCover'] = int(cloud_fraction)
 
     return ummg
-
 
 def add_related_url(ummg: dict, url: str, url_type: str, description: str = None, url_subtype: str = None) -> dict:
     """Add an element to the related urls field.  Should follow the naming convention here:
@@ -390,9 +420,10 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     # For GPolygon, add the first point again to close out
     formatted_points_list.append({'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
 
-    hsd = {"HorizontalSpatialDomain":
+    hsd = {'HorizontalSpatialDomain':
               {"Geometry":
-                  {"GPolygons": [
+                  {'CoordinateSystem': 'GEODETIC',
+                   'GPolygons': [
                       {'Boundary':
                            {'Points': formatted_points_list}}
                   ]}
