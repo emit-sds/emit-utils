@@ -408,7 +408,7 @@ def get_gring_boundary_points(glt_hdr_path: str):
     gring = hdr["gring"]
     points = []
     for i in range(1, len(gring), 2):
-        points.append([gring[i], gring[i + 1]])
+        points.append([float(gring[i]), float(gring[i + 1])])
     return points
 
 
