@@ -322,23 +322,23 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     }
 
     # First attribute is required and others may be optional
-    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Value': str(software_build_version)}]
+    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
     if orbit:
-        ummg['AdditionalAttributes'].append({'Name': 'ORBIT_NUMBER', 'Value': str(orbit)})
+        ummg['AdditionalAttributes'].append({'Name': 'ORBIT_NUMBER', 'Values': [str(orbit)]})
     if scene:
-        ummg['AdditionalAttributes'].append({'Name': 'SCENE_IN_ORBIT_NUMBER', 'Value': str(scene)})
+        ummg['AdditionalAttributes'].append({'Name': 'SCENE_IN_ORBIT_NUMBER', 'Values': [str(scene)]})
     if solar_zenith:
-        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_ZENITH', 'Value': f"{solar_zenith:.2f}"})
+        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_ZENITH', 'Values': [f"{solar_zenith:.2f}"]})
     if solar_azimuth:
-        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_AZIMUTH', 'Value': f"{solar_azimuth:.2f}"})
+        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_AZIMUTH', 'Values': [f"{solar_azimuth:.2f}"]})
     if water_vapor:
-        ummg['AdditionalAttributes'].append({'Name': 'WATER_VAPOR', 'Value': f"{water_vapor:.2f}"})
+        ummg['AdditionalAttributes'].append({'Name': 'WATER_VAPOR', 'Values': [f"{water_vapor:.2f}"]})
     if aod :
-        ummg['AdditionalAttributes'].append({'Name': 'AEROSOL_OPTICAL_DEPTH', 'Value': f"{aod:.2f}"})
+        ummg['AdditionalAttributes'].append({'Name': 'AEROSOL_OPTICAL_DEPTH', 'Values': [f"{aod:.2f}"]})
     if mean_fractional_cover:
-        ummg['AdditionalAttributes'].append({'Name': 'MEAN_FRACTIONAL_COVER', 'Value': f"{mean_fractional_cover:.2f}"})
+        ummg['AdditionalAttributes'].append({'Name': 'MEAN_FRACTIONAL_COVER', 'Values': [f"{mean_fractional_cover:.2f}"]})
     if mean_spectral_abundance:
-        ummg['AdditionalAttributes'].append({'Name': 'MEAN_SPECTRAL_ABUNDANCE', 'Value': f"{mean_spectral_abundance:.2f}"})
+        ummg['AdditionalAttributes'].append({'Name': 'MEAN_SPECTRAL_ABUNDANCE', 'Values': [f"{mean_spectral_abundance:.2f}"]})
 
 
     #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
