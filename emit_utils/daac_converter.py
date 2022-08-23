@@ -323,21 +323,21 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
 
     # First attribute is required and others may be optional
     ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
-    if orbit:
+    if orbit is not None:
         ummg['AdditionalAttributes'].append({'Name': 'ORBIT_NUMBER', 'Values': [str(orbit)]})
-    if scene:
+    if scene is not None:
         ummg['AdditionalAttributes'].append({'Name': 'SCENE_IN_ORBIT_NUMBER', 'Values': [str(scene)]})
-    if solar_zenith:
+    if solar_zenith is not None:
         ummg['AdditionalAttributes'].append({'Name': 'SOLAR_ZENITH', 'Values': [f"{solar_zenith:.2f}"]})
-    if solar_azimuth:
+    if solar_azimuth is not None:
         ummg['AdditionalAttributes'].append({'Name': 'SOLAR_AZIMUTH', 'Values': [f"{solar_azimuth:.2f}"]})
-    if water_vapor:
+    if water_vapor is not None:
         ummg['AdditionalAttributes'].append({'Name': 'WATER_VAPOR', 'Values': [f"{water_vapor:.2f}"]})
-    if aod :
+    if aod is not None:
         ummg['AdditionalAttributes'].append({'Name': 'AEROSOL_OPTICAL_DEPTH', 'Values': [f"{aod:.2f}"]})
-    if mean_fractional_cover:
+    if mean_fractional_cover is not None:
         ummg['AdditionalAttributes'].append({'Name': 'MEAN_FRACTIONAL_COVER', 'Values': [f"{mean_fractional_cover:.2f}"]})
-    if mean_spectral_abundance:
+    if mean_spectral_abundance is not None:
         ummg['AdditionalAttributes'].append({'Name': 'MEAN_SPECTRAL_ABUNDANCE', 'Values': [f"{mean_spectral_abundance:.2f}"]})
 
 
