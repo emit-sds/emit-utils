@@ -272,11 +272,11 @@ def get_required_ummg():
 
 
 def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str,
-                    start_time: datetime, stop_time: datetime, software_build_version: str, pge_name: str,
-                    pge_version: str, orbit: int = None, scene: int = None, solar_zenith: float = None,
-                    solar_azimuth: float = None, water_vapor: float = None, aod: float = None,
-                    mean_fractional_cover: float = None, mean_spectral_abundance: float = None,
-                    cloud_fraction: str = None):
+                    start_time: datetime, stop_time: datetime, pge_name: str, pge_version: str,
+                    software_build_version: str = None, doi: str = None, orbit: int = None, orbit_segment: int = None,
+                    scene: int = None, solar_zenith: float = None, solar_azimuth: float = None,
+                    water_vapor: float = None, aod: float = None, mean_fractional_cover: float = None,
+                    mean_spectral_abundance: float = None, cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -322,11 +322,18 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     }
 
     # First attribute is required and others may be optional
-    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
+    ummg['AdditionalAttributes'] = []
+    if software_build_version is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]})
+    if doi is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'Identifier_product_doi_authority', 'Values': ["https://doi.org"]})
+        ummg['AdditionalAttributes'].append({'Name': 'Identifier_product_doi', 'Values': [str(doi)]})
     if orbit is not None:
-        ummg['AdditionalAttributes'].append({'Name': 'ORBIT_NUMBER', 'Values': [str(orbit)]})
+        ummg['AdditionalAttributes'].append({'Name': 'ORBIT', 'Values': [str(orbit)]})
+    if orbit_segment is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'ORBIT_SEGMENT', 'Values': [str(orbit_segment)]})
     if scene is not None:
-        ummg['AdditionalAttributes'].append({'Name': 'SCENE_IN_ORBIT_NUMBER', 'Values': [str(scene)]})
+        ummg['AdditionalAttributes'].append({'Name': 'SCENE', 'Values': [str(scene)]})
     if solar_zenith is not None:
         ummg['AdditionalAttributes'].append({'Name': 'SOLAR_ZENITH', 'Values': [f"{solar_zenith:.2f}"]})
     if solar_azimuth is not None:
@@ -339,9 +346,6 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         ummg['AdditionalAttributes'].append({'Name': 'MEAN_FRACTIONAL_COVER', 'Values': [f"{mean_fractional_cover:.2f}"]})
     if mean_spectral_abundance is not None:
         ummg['AdditionalAttributes'].append({'Name': 'MEAN_SPECTRAL_ABUNDANCE', 'Values': [f"{mean_spectral_abundance:.2f}"]})
-
-
-    #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
 
     ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
 
