@@ -406,16 +406,6 @@ def dump_json(json_content: dict, filename: str):
         fout.write(json.dumps(json_content, indent=2, sort_keys=False, cls=SerialEncoder))
 
 
-def get_gring_boundary_points(glt_hdr_path: str):
-    hdr = envi.read_envi_header(glt_hdr_path)
-    # Assume the gring list starts with "Geographic Lon/Lat" followed by pairs of lon/lat
-    gring = hdr["gring"]
-    points = []
-    for i in range(1, len(gring), 2):
-        points.append([float(gring[i]), float(gring[i + 1])])
-    return points
-
-
 def add_boundary_ummg(ummg: dict, boundary_points: list):
     """
     Add boundary points list to UMMG in correct format

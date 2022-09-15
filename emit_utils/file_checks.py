@@ -174,3 +174,30 @@ def netcdf_ext(basepath):
         return os.path.splitext(basepath)[0] + '.nc'
     else:
         return basepath + '.nc'
+
+
+def get_gring_boundary_points(glt_hdr_path: str):
+    hdr = envi.read_envi_header(glt_hdr_path)
+    # Assume the gring list starts with "Geographic Lon/Lat" followed by pairs of lon/lat
+    gring = hdr["gring"]
+    points = []
+    for i in range(1, len(gring), 2):
+        points.append([float(gring[i]), float(gring[i + 1])])
+    return points
+
+
+def get_band_mean(input_file: str, band) -> float:
+    """
+    Determines the mean of a band
+    Args:
+        input_file (str): obs file (EMIT style)
+        band (int, optional): Band number retrieve average from.
+    Returns:
+        float: mean value of given band
+    """
+    ds = envi.open(envi_header(input_file))
+    target = ds.open_memmap(interleave='bip')[..., band]
+
+    good = target > -9990
+
+    return np.mean(target[good])
