@@ -175,13 +175,13 @@ def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
     # required and highly recommended
     nc_ds.ncei_template_version = "NCEI_NetCDF_Swath_Template_v2.0"  # required by cheatsheet
     nc_ds.summary = "The Earth Surface Mineral Dust Source Investigation (EMIT) is an Earth Ventures-Instrument (EVI-4) \
-        Mission that maps the surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and \
-        short-wave infrared (VSWIR). Installed on the International Space Station (ISS), the EMIT instrument is a Dyson \
-        imaging spectrometer that uses contiguous spectroscopic measurements from 410 to 2450 nm to resolve absoprtion \
-        features of iron oxides, clays, sulfates, carbonates, and other dust-forming minerals. During its one-year mission, \
-        EMIT will observe the sunlit Earth's dust source regions that occur within +/-52° latitude and produce maps of the \
-        source regions that can be used to improve forecasts of the role of mineral dust in the radiative forcing \
-        (warming or cooling) of the atmosphere."
+Mission that maps the surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and \
+short-wave infrared (VSWIR). Installed on the International Space Station (ISS), the EMIT instrument is a Dyson \
+imaging spectrometer that uses contiguous spectroscopic measurements from 410 to 2450 nm to resolve absoprtion \
+features of iron oxides, clays, sulfates, carbonates, and other dust-forming minerals. During its one-year mission, \
+EMIT will observe the sunlit Earth's dust source regions that occur within +/-52° latitude and produce maps of the \
+source regions that can be used to improve forecasts of the role of mineral dust in the radiative forcing \
+(warming or cooling) of the atmosphere."
 
     nc_ds.keywords = "Imaging Spectroscopy, minerals, EMIT, dust, radiative forcing"
     nc_ds.Conventions = "CF-1.63, ACDD-1.3"
@@ -206,7 +206,7 @@ def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
     nc_ds.publisher_name = "USGS LPDAAC"
     nc_ds.publisher_url = "https://lpdaac.usgs.gov"
     nc_ds.publisher_email = "lpdaac@usgs.gov"
-    nc_ds.identifier_product_doi_authority = "http://dx.doi.org"
+    nc_ds.identifier_product_doi_authority = "https://doi.org"
 
     #nc_ds.processing_level = "XXXX TO BE UPDATED"
 
@@ -271,7 +271,12 @@ def get_required_ummg():
     return ummg
 
 
-def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str, software_build_version: str, pge_name: str, pge_version: str, cloud_fraction: str = None):
+def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str,
+                    start_time: datetime, stop_time: datetime, pge_name: str, pge_version: str,
+                    software_build_version: str = None, doi: str = None, orbit: int = None, orbit_segment: int = None,
+                    scene: int = None, solar_zenith: float = None, solar_azimuth: float = None,
+                    water_vapor: float = None, aod: float = None, mean_fractional_cover: float = None,
+                    mean_spectral_abundance: float = None, cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -295,11 +300,19 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT Imaging Spectrometer'}]}]
     ummg['GranuleUR'] = granule_name
 
-    ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
-    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
-                           description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
-    ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
-                           description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
+    ummg['TemporalExtent'] = {
+        'RangeDateTime': {
+            'BeginningDateTime': start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'EndingDateTime': stop_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+        }
+    }
+
+    # As of 8/16/22 we are expecting related urls to either be in the collection metadata or inserted by the DAAC
+    # ummg['RelatedUrls'] = [{'URL': 'https://earth.jpl.nasa.gov/emit/', 'Type': 'PROJECT HOME PAGE', 'Description': 'Link to the EMIT Project Website.'}]
+    # ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+    #                        description='Link to Algorithm Theoretical Basis Documents', url_subtype='ALGORITHM DOCUMENTATION')
+    # ummg = add_related_url(ummg, 'https://github.com/emit-sds/emit-documentation', 'VIEW RELATED INFORMATION',
+    #                        description='Link to Data User\'s Guide', url_subtype='USER\'S GUIDE')
 
     # Use ProviderDate type "Update" per DAAC. Use this for data granule ProductionDateTime field too.
     ummg['ProviderDates'].append({'Date': creation_time.strftime("%Y-%m-%dT%H:%M:%SZ"), 'Type': "Update"})
@@ -308,8 +321,31 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         "Version": str(collection_version)
     }
 
-    ummg['AdditionalAttributes'] = [{'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]}]
-    #ummg['AdditionalAttributes'].append({'Name': 'SPATIAL_RESOLUTION', 'Values': ["60.0"]})
+    # First attribute is required and others may be optional
+    ummg['AdditionalAttributes'] = []
+    if software_build_version is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]})
+    if doi is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'Identifier_product_doi_authority', 'Values': ["https://doi.org"]})
+        ummg['AdditionalAttributes'].append({'Name': 'Identifier_product_doi', 'Values': [str(doi)]})
+    if orbit is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'ORBIT', 'Values': [str(orbit)]})
+    if orbit_segment is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'ORBIT_SEGMENT', 'Values': [str(orbit_segment)]})
+    if scene is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'SCENE', 'Values': [str(scene)]})
+    if solar_zenith is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_ZENITH', 'Values': [f"{solar_zenith:.2f}"]})
+    if solar_azimuth is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'SOLAR_AZIMUTH', 'Values': [f"{solar_azimuth:.2f}"]})
+    if water_vapor is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'WATER_VAPOR', 'Values': [f"{water_vapor:.2f}"]})
+    if aod is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'AEROSOL_OPTICAL_DEPTH', 'Values': [f"{aod:.2f}"]})
+    if mean_fractional_cover is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'MEAN_FRACTIONAL_COVER', 'Values': [f"{mean_fractional_cover:.2f}"]})
+    if mean_spectral_abundance is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'MEAN_SPECTRAL_ABUNDANCE', 'Values': [f"{mean_spectral_abundance:.2f}"]})
 
     ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
 
@@ -317,7 +353,6 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         ummg['CloudCover'] = int(cloud_fraction)
 
     return ummg
-
 
 def add_related_url(ummg: dict, url: str, url_type: str, description: str = None, url_subtype: str = None) -> dict:
     """Add an element to the related urls field.  Should follow the naming convention here:
@@ -390,9 +425,9 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     # For GPolygon, add the first point again to close out
     formatted_points_list.append({'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
 
-    hsd = {"HorizontalSpatialDomain":
+    hsd = {'HorizontalSpatialDomain':
               {"Geometry":
-                  {"GPolygons": [
+                  {'GPolygons': [
                       {'Boundary':
                            {'Points': formatted_points_list}}
                   ]}
