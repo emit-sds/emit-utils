@@ -51,6 +51,10 @@ def main(rawargs=None):
 
     nc_ds = netCDF4.Dataset(args.input_netcdf, 'r', format='NETCDF4')
 
+    if os.path.isdir(args.output_dir) is False:
+        err_str = f'Output directory {args.output_dir} does not exist - please create or try again'
+        raise AttributeError(err_str)
+
     if args.orthorectify:
         glt = np.zeros(list(nc_ds.groups['location']['glt_x'].shape) + [2], dtype=np.int32)
         glt[...,0] = np.array(nc_ds.groups['location']['glt_x'])
@@ -90,8 +94,10 @@ def main(rawargs=None):
 
             band_parameters = nc_ds['sensor_band_parameters'].variables.keys() 
             for bp in band_parameters:
-                if bp == 'wavelengths':
+                if bp == 'wavelengths' or bp == 'radiance_wl':
                     metadata['wavelength'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+                elif bp == 'radiance_fwhm':
+                    metadata['fwhm'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
                 else:
                     metadata[bp] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
 
