@@ -84,7 +84,7 @@ def main(rawargs=None):
                 metadata['lines'] = glt.shape[0]
                 metadata['samples'] = glt.shape[1]
                 gt = np.array(nc_ds.__dict__["geotransform"])
-                metadata['map info'] = f'{{Geographic Lat/Lon, 1, 1, {gt[0]}, {gt[3] + gt[5]*glt.shape[0]}, {gt[1]}, {gt[5]},WGS-84}}'
+                metadata['map info'] = f'{{Geographic Lat/Lon, 1, 1, {gt[0]}, {gt[3]}, {gt[1]}, {gt[5]*-1},WGS-84}}'
 
                 metadata['coordinate system string'] = f'{{ {nc_ds.__dict__["spatial_ref"]} }}' 
 
@@ -99,19 +99,10 @@ def main(rawargs=None):
             mm = envi_ds.open_memmap(interleave='bip',writable=True)
 
             if args.orthorectify:
-                mm[...] = single_image_ortho(np.array(nc_ds[ds]), glt)[::-1,:,:]
+                mm[...] = single_image_ortho(np.array(nc_ds[ds]), glt)
             else:
-                mm[...] = np.array(nc_ds[ds])[::-1,:,:]
+                mm[...] = np.array(nc_ds[ds])
             del mm, envi_ds
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
