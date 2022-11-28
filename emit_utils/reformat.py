@@ -98,8 +98,13 @@ def main(rawargs=None):
                     metadata['wavelength'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
                 elif bp == 'radiance_fwhm':
                     metadata['fwhm'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+                elif bp == 'observation_bands':
+                    metadata['band names'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
                 else:
                     metadata[bp] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+            
+            if 'wavelength' in list(metadata.keys()) and 'band names' not in list(metadata.keys()):
+                metadata['band names'] = metadata['wavelength']
 
             envi_ds = envi.create_image(envi_header(output_name), metadata, ext='', force=args.overwrite) 
             mm = envi_ds.open_memmap(interleave='bip',writable=True)
