@@ -1,4 +1,8 @@
+"""
+A simple script to reformat EMIT netCDFs to alternate formats.
 
+Author: Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
+"""
 import argparse
 import netCDF4
 import numpy as np
