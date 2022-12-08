@@ -108,10 +108,10 @@ def add_loc(nc_ds, loc_envi_file):
 
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
-    add_variable(nc_ds, "location/lat", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
+    add_variable(nc_ds, "location/lon", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
                  {"dimensions": ("downtrack", "crosstrack")} )
 
-    add_variable(nc_ds, "location/lon", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
+    add_variable(nc_ds, "location/lat", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
                  {"dimensions": ("downtrack", "crosstrack")} )
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
@@ -189,7 +189,7 @@ source regions that can be used to improve forecasts of the role of mineral dust
     nc_ds.sensor = "EMIT (Earth Surface Mineral Dust Source Investigation)"
     nc_ds.instrument = "EMIT"
     nc_ds.platform = "ISS"
-    nc_ds.processing_version = "V1.0"
+    # nc_ds.processing_version = "V1.0"
     nc_ds.Conventions = "CF-1.63"
     nc_ds.institution = "NASA Jet Propulsion Laboratory/California Institute of Technology"
     nc_ds.license = "https://science.nasa.gov/earth-science/earth-science-data/data-information-policy/"
@@ -235,8 +235,10 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     nc_ds.time_coverage_start = primary_ds.metadata['emit acquisition start time']
     nc_ds.time_coverage_end = primary_ds.metadata['emit acquisition stop time']
     nc_ds.software_build_version = primary_ds.metadata['emit software build version']
-    nc_ds.product_version = primary_ds.metadata['emit data product version']
-    nc_ds.history = "PGE Input files: " + ", ".join(primary_ds.metadata['emit pge input files'])
+    nc_ds.product_version = "V0" + primary_ds.metadata['emit data product version']
+    run_command = "PGE Run Command: {" + primary_ds.metadata['emit pge run command'] + "}"
+    input_files = "PGE Input Files: {" + ", ".join(primary_ds.metadata['emit pge input files']) + "}"
+    nc_ds.history = run_command + ", " + input_files
 
     # only include spatial information if provided (may not be available for all PGEs)
     if glt_envi_file is not None:
