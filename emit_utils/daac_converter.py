@@ -238,7 +238,6 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     run_command = "PGE Run Command: {" + primary_ds.metadata['emit pge run command'] + "}"
     input_files = "PGE Input Files: {" + ", ".join(primary_ds.metadata['emit pge input files']) + "}"
     nc_ds.history = run_command + ", " + input_files
-    nc_ds.history = "PGE Input files: " + ", ".join(primary_ds.metadata['emit pge input files'])
     if 'flip horizontal' in primary_ds.metadata.keys():
         if int(primary_ds.metadata['flip horizontal']) == 1:
             nc_ds.crosstrack_orientation = 'as seen on ground'
