@@ -1,7 +1,5 @@
 <h1 align="center">emit-utils</h1>
 
-NOTE - at this time the EMIT repositories are not supporting Pull Requests from members outside of the EMIT-SDS Team.  This is expected to change in March, and guidance on branches will be provided at that time. At present, public migration of this repository is a work-in-progress, and not all features are yet fully up to date.  See the **develop** branch - set as default - for the latest code._
-
 Welcome to the EMIT utils science data system repository.  To understand how this repository is linked to the rest of the emit-sds repositories, please see [the repository guide](https://github.com/emit-sds/emit-main/wiki/Repository-Guide).
 
 The emit utils repository provides general convenience utilities used broadly throughout the emit-sds.  This repository can be installed locally by:
@@ -10,3 +8,11 @@ The emit utils repository provides general convenience utilities used broadly th
 git clone git@github.com:emit-sds/emit-utils.git
 pip install --editable git@github.com:emit-sds/emit-utils.git
 ```
+
+In addition to integrated utilities, this repository includes a reformatting script to convert EMIT netCDF files (as delivered to the LP DAAC) to ENVI files.  Simply run:
+
+```
+python emit_utils/reformat.py example.nc OUTPUT_DIR
+```
+
+Optionally, the '--orthorectify' option can be added to use the embedded GLT for rapid orthorectification.

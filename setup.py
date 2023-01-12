@@ -9,12 +9,13 @@ from setuptools import setup, find_packages
 setup(name='emit_utils',
       packages=find_packages(),
       include_package_data=True,
-      version='1.2.0',
+      version='1.2.1',
       install_requires=[
           'gdal>=2.0',
           'spectral>=0.21',
           'numpy>=1.19.2',
-          'netcdf4>=1.5.8'
+          'netcdf4>=1.5.8',
+          'argparse>=1.0'
       ],
       python_requires='>=3',
       platforms='any',
