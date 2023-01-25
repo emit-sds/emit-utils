@@ -247,9 +247,9 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     # only include spatial information if provided (may not be available for all PGEs)
     if glt_envi_file is not None:
         ul_lr, res = _get_spatial_extent_res(glt_envi_file)
-        nc_ds.easternmost_longitude = ul_lr[0]
+        nc_ds.easternmost_longitude = ul_lr[2]
         nc_ds.northernmost_latitude = ul_lr[1]
-        nc_ds.westernmost_longitude = ul_lr[2]
+        nc_ds.westernmost_longitude = ul_lr[0]
         nc_ds.southernmost_latitude = ul_lr[3]
         nc_ds.spatialResolution = res
 
