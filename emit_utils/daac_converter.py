@@ -214,7 +214,8 @@ source regions that can be used to improve forecasts of the role of mineral dust
 
 
 
-def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file: str = None):
+def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, software_delivery_version: str,
+                   glt_envi_file: str = None):
     """
     Set up global attributes that are universal.  Required attributes that should be populated by individual PGEs
     are flagged with None values
@@ -234,6 +235,7 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, glt_envi_file
     nc_ds.time_coverage_start = primary_ds.metadata['emit acquisition start time']
     nc_ds.time_coverage_end = primary_ds.metadata['emit acquisition stop time']
     nc_ds.software_build_version = primary_ds.metadata['emit software build version']
+    nc_ds.software_delivery_version = software_delivery_version
     nc_ds.product_version = "V0" + primary_ds.metadata['emit data product version']
     run_command = "PGE Run Command: {" + primary_ds.metadata['emit pge run command'] + "}"
     input_files = "PGE Input Files: {" + ", ".join(primary_ds.metadata['emit pge input files']) + "}"
@@ -279,10 +281,11 @@ def get_required_ummg():
 
 def initialize_ummg(granule_name: str, creation_time: datetime, collection_name: str, collection_version: str,
                     start_time: datetime, stop_time: datetime, pge_name: str, pge_version: str,
-                    software_build_version: str = None, doi: str = None, orbit: int = None, orbit_segment: int = None,
-                    scene: int = None, solar_zenith: float = None, solar_azimuth: float = None,
-                    water_vapor: float = None, aod: float = None, mean_fractional_cover: float = None,
-                    mean_spectral_abundance: float = None, cloud_fraction: str = None):
+                    software_build_version: str = None, software_delivery_version: str = None, doi: str = None,
+                    orbit: int = None, orbit_segment: int = None, scene: int = None, solar_zenith: float = None,
+                    solar_azimuth: float = None, water_vapor: float = None, aod: float = None,
+                    mean_fractional_cover: float = None, mean_spectral_abundance: float = None,
+                    cloud_fraction: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -331,6 +334,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     ummg['AdditionalAttributes'] = []
     if software_build_version is not None:
         ummg['AdditionalAttributes'].append({'Name': 'SOFTWARE_BUILD_VERSION', 'Values': [str(software_build_version)]})
+    if software_delivery_version is not None:
+        ummg['AdditionalAttributes'].append({'Name': 'SOFTWARE_DELIVERY_VERSION', 'Values': [str(software_delivery_version)]})
     if doi is not None:
         ummg['AdditionalAttributes'].append({'Name': 'Identifier_product_doi_authority', 'Values': ["https://doi.org"]})
         ummg['AdditionalAttributes'].append({'Name': 'Identifier_product_doi', 'Values': [str(doi)]})
