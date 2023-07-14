@@ -71,10 +71,14 @@ def main(rawargs=None):
             if os.path.isfile(output_name) and args.overwrite is False:
                 err_str = f'File {output_name} already exists. Please use --overwrite to replace'
                 raise AttributeError(err_str)
+            nbands = 1
+            if len(nc_ds[ds].shape) > 2:
+                nbands = nc_ds[ds].shape[2]
+
             metadata = {
                 'lines': nc_ds[ds].shape[0],
                 'samples': nc_ds[ds].shape[1],
-                'bands': nc_ds[ds].shape[2],
+                'bands': nbands,
                 'interleave': args.interleave,
                 'header offset' : 0,
                 'file type' : 'ENVI Standard',
@@ -96,16 +100,17 @@ def main(rawargs=None):
 
                 metadata['coordinate system string'] = f'{{ {nc_ds.__dict__["spatial_ref"]} }}' 
 
-            band_parameters = nc_ds['sensor_band_parameters'].variables.keys() 
-            for bp in band_parameters:
-                if bp == 'wavelengths' or bp == 'radiance_wl':
-                    metadata['wavelength'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
-                elif bp == 'radiance_fwhm':
-                    metadata['fwhm'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
-                elif bp == 'observation_bands':
-                    metadata['band names'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
-                else:
-                    metadata[bp] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+            if 'sensor_band_parameters' in nc_ds.__dict__.keys():
+                band_parameters = nc_ds['sensor_band_parameters'].variables.keys() 
+                for bp in band_parameters:
+                    if bp == 'wavelengths' or bp == 'radiance_wl':
+                        metadata['wavelength'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+                    elif bp == 'radiance_fwhm':
+                        metadata['fwhm'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+                    elif bp == 'observation_bands':
+                        metadata['band names'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
+                    else:
+                        metadata[bp] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
             
             if 'wavelength' in list(metadata.keys()) and 'band names' not in list(metadata.keys()):
                 metadata['band names'] = metadata['wavelength']
@@ -113,10 +118,14 @@ def main(rawargs=None):
             envi_ds = envi.create_image(envi_header(output_name), metadata, ext='', force=args.overwrite) 
             mm = envi_ds.open_memmap(interleave='bip',writable=True)
 
+            dat = np.array(nc_ds[ds])
+            if len(dat.shape) == 2:
+                dat = dat.reshape((dat.shape[0],dat.shape[1],1))
+
             if args.orthorectify:
-                mm[...] = single_image_ortho(np.array(nc_ds[ds]), glt)
+                mm[...] = single_image_ortho(dat, glt)
             else:
-                mm[...] = np.array(nc_ds[ds])
+                mm[...] = np.array(dat)
             del mm, envi_ds
 
 
