@@ -201,7 +201,7 @@ source regions that can be used to improve forecasts of the role of mineral dust
     nc_ds.creator_name = "Jet Propulsion Laboratory/California Institute of Technology"
     nc_ds.creator_url = "https://earth.jpl.nasa.gov/emit/"
     nc_ds.project = "Earth Surface Mineral Dust Source Investigation"
-    nc_ds.project_url = "https://emit.jpl.nasa.gov/"
+    nc_ds.project_url = "https://earth.jpl.nasa.gov/emit/"
     nc_ds.publisher_name = "NASA LPDAAC"
     nc_ds.publisher_url = "https://lpdaac.usgs.gov"
     nc_ds.publisher_email = "lpdaac@usgs.gov"
