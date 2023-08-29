@@ -308,8 +308,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     """
 
     ummg = get_required_ummg()
-    ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
-                                     'Version': '1.6.3'}
+    ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.5', 'Name': 'UMM-G',
+                                     'Version': '1.6.5'}
 
     
     ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT Imaging Spectrometer'}]}]
