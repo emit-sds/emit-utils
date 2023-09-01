@@ -201,7 +201,7 @@ source regions that can be used to improve forecasts of the role of mineral dust
     nc_ds.creator_name = "Jet Propulsion Laboratory/California Institute of Technology"
     nc_ds.creator_url = "https://earth.jpl.nasa.gov/emit/"
     nc_ds.project = "Earth Surface Mineral Dust Source Investigation"
-    nc_ds.project_url = "https://emit.jpl.nasa.gov/"
+    nc_ds.project_url = "https://earth.jpl.nasa.gov/emit/"
     nc_ds.publisher_name = "NASA LPDAAC"
     nc_ds.publisher_url = "https://lpdaac.usgs.gov"
     nc_ds.publisher_email = "lpdaac@usgs.gov"
@@ -215,7 +215,7 @@ source regions that can be used to improve forecasts of the role of mineral dust
 
 
 def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, software_delivery_version: str,
-                   glt_envi_file: str = None):
+                   glt_envi_file: str = None, rdn_runconfig_file: str = None):
     """
     Set up global attributes that are universal.  Required attributes that should be populated by individual PGEs
     are flagged with None values
@@ -237,6 +237,12 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, software_deli
     nc_ds.software_build_version = primary_ds.metadata['emit software build version']
     nc_ds.software_delivery_version = software_delivery_version
     nc_ds.product_version = "V0" + primary_ds.metadata['emit data product version']
+    if rdn_runconfig_file is not None:
+        with open(rdn_runconfig_file, "r") as f:
+            runconfig = json.load(f)
+        ffupdate_files = [os.path.basename(p) for p in runconfig["flat_field_update_paths"]]
+        ffupdate_str = ",".join(ffupdate_files)
+        primary_ds.metadata['emit pge input files'].append(f"ffupdate_files=[{ffupdate_str}]")
     run_command = "PGE Run Command: {" + primary_ds.metadata['emit pge run command'] + "}"
     input_files = "PGE Input Files: {" + ", ".join(primary_ds.metadata['emit pge input files']) + "}"
     nc_ds.history = run_command + ", " + input_files
@@ -302,8 +308,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
     """
 
     ummg = get_required_ummg()
-    ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.3', 'Name': 'UMM-G',
-                                     'Version': '1.6.3'}
+    ummg['MetadataSpecification'] = {'URL': 'https://cdn.earthdata.nasa.gov/umm/granule/v1.6.5', 'Name': 'UMM-G',
+                                     'Version': '1.6.5'}
 
     
     ummg['Platforms'] = [{'ShortName': 'ISS', 'Instruments': [{'ShortName': 'EMIT Imaging Spectrometer'}]}]
