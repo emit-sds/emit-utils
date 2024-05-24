@@ -100,10 +100,7 @@ def main(rawargs=None):
 
                 metadata['coordinate system string'] = f'{{ {nc_ds.__dict__["spatial_ref"]} }}'
 
-            if (
-                "sensor_band_parameters" in nc_ds.groups
-                and "wavelengths" in nc_ds["sensor_band_parameters"].variables
-            ):
+            if ("sensor_band_parameters" in nc_ds.groups):
                 band_parameters = nc_ds['sensor_band_parameters'].variables.keys()
                 for bp in band_parameters:
                     if bp == 'wavelengths' or bp == 'radiance_wl':
