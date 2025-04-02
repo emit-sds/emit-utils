@@ -98,10 +98,10 @@ def main(rawargs=None):
                 gt = np.array(nc_ds.__dict__["geotransform"])
                 metadata['map info'] = f'{{Geographic Lat/Lon, 1, 1, {gt[0]}, {gt[3]}, {gt[1]}, {gt[5]*-1},WGS-84}}'
 
-                metadata['coordinate system string'] = f'{{ {nc_ds.__dict__["spatial_ref"]} }}' 
+                metadata['coordinate system string'] = f'{{ {nc_ds.__dict__["spatial_ref"]} }}'
 
-            if 'sensor_band_parameters' in nc_ds.__dict__.keys():
-                band_parameters = nc_ds['sensor_band_parameters'].variables.keys() 
+            if ("sensor_band_parameters" in nc_ds.groups):
+                band_parameters = nc_ds['sensor_band_parameters'].variables.keys()
                 for bp in band_parameters:
                     if bp == 'wavelengths' or bp == 'radiance_wl':
                         metadata['wavelength'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
@@ -111,11 +111,11 @@ def main(rawargs=None):
                         metadata['band names'] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
                     else:
                         metadata[bp] = np.array(nc_ds['sensor_band_parameters'].variables[bp]).astype(str).tolist()
-            
+
             if 'wavelength' in list(metadata.keys()) and 'band names' not in list(metadata.keys()):
                 metadata['band names'] = metadata['wavelength']
 
-            envi_ds = envi.create_image(envi_header(output_name), metadata, ext='', force=args.overwrite) 
+            envi_ds = envi.create_image(envi_header(output_name), metadata, ext='', force=args.overwrite)
             mm = envi_ds.open_memmap(interleave='bip',writable=True)
 
             dat = np.array(nc_ds[ds])
