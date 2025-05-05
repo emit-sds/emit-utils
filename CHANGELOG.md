@@ -2,9 +2,15 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+#### [v1.3.2](https://github.com/emit-sds/emit-utils/compare/v1.3.1...v1.3.2)
+
+> 5 May 2025
+> 
+* Cosmetic tweaks - fix version number in setup.py and bad date in change log.
+
 #### [v1.3.1](https://github.com/emit-sds/emit-utils/compare/v1.3.0...v1.3.1)
 
-> 1 September 2023
+> 2 April 2025
 > 
 * Fix check for sensor band parameters in NETCDF to ENVI conversion by @vatsal-j in https://github.com/emit-sds/emit-utils/pull/13
 
