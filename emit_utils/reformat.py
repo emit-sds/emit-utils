@@ -115,12 +115,17 @@ def main(rawargs=None):
             if 'wavelength' in list(metadata.keys()) and 'band names' not in list(metadata.keys()):
                 metadata['band names'] = metadata['wavelength']
 
-            envi_ds = envi.create_image(envi_header(output_name), metadata, ext='', force=args.overwrite)
-            mm = envi_ds.open_memmap(interleave='bip',writable=True)
+            # special case for flat field updat
+            if ds == 'flat_field_update' and args.orthorectify:
+                print(f'{ds} is not something that can be orthorectified - skipping.  If you want this file, rerun without --orthorectify')
+                continue
 
             dat = np.array(nc_ds[ds])
             if len(dat.shape) == 2:
                 dat = dat.reshape((dat.shape[0],dat.shape[1],1))
+
+            envi_ds = envi.create_image(envi_header(output_name), metadata, ext='', force=args.overwrite)
+            mm = envi_ds.open_memmap(interleave='bip',writable=True)
 
             if args.orthorectify:
                 mm[...] = single_image_ortho(dat, glt)
