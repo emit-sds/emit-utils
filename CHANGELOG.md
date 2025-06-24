@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+#### [v1.3.3](https://github.com/emit-sds/emit-utils/compare/v1.3.2...v1.3.3)
+
+> 24 June 2025
+
+* resolve flat field issue with ortho flag on by @pgbrodrick in https://github.com/emit-sds/emit-utils/pull/16
+
 #### [v1.3.2](https://github.com/emit-sds/emit-utils/compare/v1.3.1...v1.3.2)
 
 > 5 May 2025
