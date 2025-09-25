@@ -192,7 +192,7 @@ source regions that can be used to improve forecasts of the role of mineral dust
     # nc_ds.processing_version = "V1.0"
     nc_ds.Conventions = "CF-1.63"
     nc_ds.institution = "NASA Jet Propulsion Laboratory/California Institute of Technology"
-    nc_ds.license = "https://science.nasa.gov/earth-science/earth-science-data/data-information-policy/"
+    nc_ds.license = "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance"
     nc_ds.naming_authority = "LPDAAC"
     dt_now = datetime.now()
     nc_ds.date_created = dt_now.strftime("%Y-%m-%dT%H:%M:%SZ")
