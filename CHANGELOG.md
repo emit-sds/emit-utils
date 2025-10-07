@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+#### [v1.3.4](https://github.com/emit-sds/emit-utils/compare/v1.3.3...v1.3.4)
+
+> 7 Oct 2025
+
+* License update by @adamchlus in https://github.com/emit-sds/emit-utils/pull/18
+
 #### [v1.3.3](https://github.com/emit-sds/emit-utils/compare/v1.3.2...v1.3.3)
 
 > 24 June 2025
