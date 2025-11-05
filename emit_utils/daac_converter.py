@@ -79,7 +79,7 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
 
 
 def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
-    if fill_value:
+    if fill_value is not None:
         kargs['fill_value'] = fill_value
 
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
@@ -118,7 +118,7 @@ def add_loc(nc_ds, loc_envi_file):
     nc_ds.sync()
 
 
-def add_glt(nc_ds, glt_envi_file):
+def add_glt(nc_ds, glt_envi_file, fill_value = 0):
     """
     Add a location file to the netcdf output
     Args:
@@ -129,10 +129,12 @@ def add_glt(nc_ds, glt_envi_file):
     """
     glt = envi.open(envi_header(glt_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/glt_x", "i4", "GLT Sample Lookup", "pixel location",
-                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
+                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9},
+                 fill_value = fill_value)
 
     add_variable(nc_ds, "location/glt_y", "i4", "GLT Line Lookup", "pixel location",
-                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
+                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9},
+                 fill_value = fill_value)
     nc_ds.sync()
 
 
