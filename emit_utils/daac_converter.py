@@ -49,8 +49,6 @@ import numpy as np
 
 from emit_utils.file_checks import envi_header
 
-NODATA = -9999.
-
 def _get_spatial_extent_res(path, projection_epsg=4326):
     """
     Get the spatial extent of a dataset, converted to a specified projection
@@ -80,8 +78,9 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
     return output_extent, trans[1]
 
 
-def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
-    kargs['fill_value'] = NODATA
+def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
+    if fill_value:
+        kargs['fill_value'] = fill_value
 
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
     if long_name is not None:
