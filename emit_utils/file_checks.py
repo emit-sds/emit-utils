@@ -73,8 +73,8 @@ def check_raster_drivers(file_list: np.array):
     """
     anybad = False
     for file in file_list:
-        if gdal.Open(file, gdal.GA_ReadOnly) is None:
-            logging.error('Input GLT file: {} not a recognized raster format'.format(file))
+        if gdal.OpenEx(file, gdal.GA_ReadOnly, allowed_drivers=['ENVI']) is None:
+            logging.error('Input file: {} not a recognized raster format'.format(file))
             anybad = True
     if anybad:
         raise FileNotFoundError('Files not in recognized raster format, check logs for details')
