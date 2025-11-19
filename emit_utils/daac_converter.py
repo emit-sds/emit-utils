@@ -49,6 +49,8 @@ import numpy as np
 
 from emit_utils.file_checks import envi_header
 
+NODATA = -9999.
+
 def _get_spatial_extent_res(path, projection_epsg=4326):
     """
     Get the spatial extent of a dataset, converted to a specified projection
@@ -79,9 +81,14 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
 
 
 def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
-    if fill_value is not None:
+    
+    if data_type == "u1":
+        kargs['fill_value'] = np.uint8(np.mod(int(NODATA), 2**8))
+    elif data_type == "u4":
+        kargs['fill_value'] = np.uint32(np.mod(int(NODATA), 2**32))
+    elif fill_value is not None:
         kargs['fill_value'] = fill_value
-
+ 
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
     if long_name is not None:
         nc_var.long_name = long_name
@@ -96,7 +103,7 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_
     nc_ds.sync()
 
 
-def add_loc(nc_ds, loc_envi_file):
+def add_loc(nc_ds, loc_envi_file, fill_value = -9999.):
     """
     Add a location file to the netcdf output
     Args:
@@ -108,13 +115,13 @@ def add_loc(nc_ds, loc_envi_file):
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/lon", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")} )
+                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
 
     add_variable(nc_ds, "location/lat", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")} )
+                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")} )
+                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
     nc_ds.sync()
 
 
