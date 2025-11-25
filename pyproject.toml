@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emit_utils"
+version = "1.4.0"
+description = "Utility scripts that support EMIT science data processing"
+authors = [
+    { name = "Phil Brodrick", email = "philip.brodrick@jpl.nasa.gov" },
+    { name = "Winston Olson-Duvall", email = "winston.olson-duvall@jpl.nasa.gov" },
+    { name = "Adam Chlus", email = "adam.m.chlus@jpl.nasa.gov" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "gdal>=3.11.4",
+    "netcdf4>=1.7.3",
+    "numpy>=2.3.4",
+    "spectral>=0.24"
+]
+
