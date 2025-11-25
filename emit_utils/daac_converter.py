@@ -80,27 +80,15 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
     return output_extent, trans[1]
 
 
-<<<<<<< HEAD
 def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
     
-=======
-def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
-    # Numpy 2.x throws OverflowError when casting unsigned ints to -9999. This block of code can be removed when we
-    # remove unnecessary fill values.
->>>>>>> origin/develop
     if data_type == "u1":
         kargs['fill_value'] = np.uint8(np.mod(int(NODATA), 2**8))
     elif data_type == "u4":
         kargs['fill_value'] = np.uint32(np.mod(int(NODATA), 2**32))
-<<<<<<< HEAD
     elif fill_value is not None:
         kargs['fill_value'] = fill_value
  
-=======
-    else:
-        kargs['fill_value'] = NODATA
-
->>>>>>> origin/develop
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
     if long_name is not None:
         nc_var.long_name = long_name
