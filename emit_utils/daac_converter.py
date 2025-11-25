@@ -80,16 +80,15 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
     return output_extent, trans[1]
 
 
-def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
-    # Numpy 2.x throws OverflowError when casting unsigned ints to -9999. This block of code can be removed when we
-    # remove unnecessary fill values.
+def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
+    
     if data_type == "u1":
         kargs['fill_value'] = np.uint8(np.mod(int(NODATA), 2**8))
     elif data_type == "u4":
         kargs['fill_value'] = np.uint32(np.mod(int(NODATA), 2**32))
-    else:
-        kargs['fill_value'] = NODATA
-
+    elif fill_value is not None:
+        kargs['fill_value'] = fill_value
+ 
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
     if long_name is not None:
         nc_var.long_name = long_name
@@ -104,7 +103,7 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs):
     nc_ds.sync()
 
 
-def add_loc(nc_ds, loc_envi_file):
+def add_loc(nc_ds, loc_envi_file, fill_value = -9999.):
     """
     Add a location file to the netcdf output
     Args:
@@ -116,17 +115,17 @@ def add_loc(nc_ds, loc_envi_file):
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/lon", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")} )
+                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
 
     add_variable(nc_ds, "location/lat", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")} )
+                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")} )
+                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
     nc_ds.sync()
 
 
-def add_glt(nc_ds, glt_envi_file):
+def add_glt(nc_ds, glt_envi_file, fill_value = 0):
     """
     Add a location file to the netcdf output
     Args:
@@ -137,10 +136,12 @@ def add_glt(nc_ds, glt_envi_file):
     """
     glt = envi.open(envi_header(glt_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/glt_x", "i4", "GLT Sample Lookup", "pixel location",
-                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
+                 glt[..., 0].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9},
+                 fill_value = fill_value)
 
     add_variable(nc_ds, "location/glt_y", "i4", "GLT Line Lookup", "pixel location",
-                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9})
+                 glt[..., 1].copy(), {"dimensions": ("ortho_y", "ortho_x"), "zlib": True, "complevel": 9},
+                 fill_value = fill_value)
     nc_ds.sync()
 
 
