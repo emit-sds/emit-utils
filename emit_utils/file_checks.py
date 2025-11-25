@@ -28,6 +28,22 @@ def check_cloudfraction(mask_file: str, mask_band=7) -> float:
     fraction = np.sum(clouds > 0) * 100 / np.product(clouds.shape) 
     return int(np.round(fraction))
 
+def check_nodatafraction(input_file: str, band=0, no_data_value=-9999) -> float:
+    """
+    Determines the no data fraction from an input file
+
+    Args:
+        input_file (str): ENVI file
+        band (int, optional): Band number to calculate no data fraction from.
+        no_data_value (int, optional): No data value
+
+    Returns:
+        float: no data fraction as rounded percent (0-100)
+    """
+    ds = envi.open(envi_header(input_file))
+    data = ds.open_memmap(interleave='bip')[..., band]
+    fraction = np.sum(data == no_data_value) * 100 / np.prod(data.shape)
+    return int(np.round(fraction))
 
 def check_daynight(obs_file: str, zenith_band=4):
     """
