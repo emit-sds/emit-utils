@@ -442,10 +442,12 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
         dictionary representation of ummg
     """
 
-
     formatted_points_list = []
     for point in boundary_points:
-        formatted_points_list.append({'Longitude': point[0], 'Latitude': point[1]})
+        lon = point[0]
+        if lon > 180:
+            lon = lon - 360
+        formatted_points_list.append({'Longitude': lon, 'Latitude': point[1]})
 
     # For GPolygon, add the first point again to close out
     formatted_points_list.append({'Longitude': boundary_points[0][0], 'Latitude': boundary_points[0][1]})
