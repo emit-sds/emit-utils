@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "emit_utils"
-version = "1.4.0"
+version = "1.4.1"
 description = "Utility scripts that support EMIT science data processing"
 authors = [
     { name = "Phil Brodrick", email = "philip.brodrick@jpl.nasa.gov" },

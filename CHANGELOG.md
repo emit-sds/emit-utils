@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+#### [v1.4.1](https://github.com/emit-sds/emit-utils/compare/v1.4.0...v1.4.1)
+
+> 5 Dec 2025
+
+* Added list of allowed drivers to prevent GDAL from inferring wrong format by @adamchlus in https://github.com/emit-sds/emit-utils/pull/22
+* NetCDF fill value by @adamchlus in https://github.com/emit-sds/emit-utils/pull/23
+
 #### [v1.4.0](https://github.com/emit-sds/emit-utils/compare/v1.3.4...v1.4.0)
 
 > 5 Nov 2025
