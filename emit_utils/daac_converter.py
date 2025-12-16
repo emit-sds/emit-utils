@@ -446,7 +446,9 @@ def add_boundary_ummg(ummg: dict, boundary_points: list):
     for point in boundary_points:
         lon = point[0]
         if lon > 180:
-            lon = lon - 360
+            lon -= 360
+        elif lon < -180:
+            lon += 360
         formatted_points_list.append({'Longitude': lon, 'Latitude': point[1]})
 
     # For GPolygon, add the first point again to close out
