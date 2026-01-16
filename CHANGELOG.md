@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+#### [v1.4.2](https://github.com/emit-sds/emit-utils/compare/v1.4.1...v1.4.2)
+
+> 16 Jan 2026
+
+* Normalize longitude values when formatting boundary points by @adamchlus in https://github.com/emit-sds/emit-utils/pull/25
+
 #### [v1.4.1](https://github.com/emit-sds/emit-utils/compare/v1.4.0...v1.4.1)
 
 > 5 Dec 2025
