@@ -192,13 +192,12 @@ source regions that can be used to improve forecasts of the role of mineral dust
 (warming or cooling) of the atmosphere."
 
     nc_ds.keywords = "Imaging Spectroscopy, minerals, EMIT, dust, radiative forcing"
-    nc_ds.Conventions = "CF-1.63, ACDD-1.3"
     # Not required or highly recommended.
     nc_ds.sensor = "EMIT (Earth Surface Mineral Dust Source Investigation)"
     nc_ds.instrument = "EMIT"
     nc_ds.platform = "ISS"
     # nc_ds.processing_version = "V1.0"
-    nc_ds.Conventions = "CF-1.63"
+    nc_ds.Conventions = "CF-1.13"
     nc_ds.institution = "NASA Jet Propulsion Laboratory/California Institute of Technology"
     nc_ds.license = "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance"
     nc_ds.naming_authority = "LPDAAC"
