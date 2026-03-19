@@ -1,6 +1,13 @@
 ### Changelog
 
-All notable changes to this project will be documented in this file. Dates are displayed in UTC.
+All notable changes to this project will be documented in this file.
+
+#### [v1.4.3](https://github.com/emit-sds/emit-utils/compare/v1.4.2...v1.4.3)
+
+> 19 Mar 2026
+
+* Use CF-1.13 for "Conventions" field in NetCDF metadata.
+
 
 #### [v1.4.2](https://github.com/emit-sds/emit-utils/compare/v1.4.1...v1.4.2)
 
