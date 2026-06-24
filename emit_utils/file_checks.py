@@ -221,7 +221,6 @@ def get_band_mean(input_file: str, band, circular: bool = False) -> float:
         return mean % 360
     return np.mean(vals)
 
-
 def get_band_means(input_file: str, circular_bands=[], return_names: bool = False):
     ds = envi.open(envi_header(input_file))
     cube = ds.open_memmap(interleave='bip')
