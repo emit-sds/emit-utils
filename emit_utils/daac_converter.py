@@ -298,7 +298,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
                     orbit: int = None, orbit_segment: int = None, scene: int = None, solar_zenith: float = None,
                     solar_azimuth: float = None, water_vapor: float = None, aod: float = None,
                     mean_fractional_cover: float = None, mean_spectral_abundance: float = None,
-                    cloud_fraction: str = None):
+                    cloud_cover: str = None):
     """ Initialize a UMMG metadata output file
     Args:
         granule_name: granule UR tag
@@ -308,7 +308,7 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
         software_build_version: version of software build
         pge_name: PGE name  from build configuration
         pge_version: PGE version from build configuration
-        cloud_fraction: rounded fraction of cloudcover if applicable
+        cloud_cover: rounded fraction of cloudcover if applicable
 
     Returns:
         dictionary representation of ummg
@@ -373,8 +373,8 @@ def initialize_ummg(granule_name: str, creation_time: datetime, collection_name:
 
     ummg['PGEVersionClass'] = {'PGEName': pge_name, 'PGEVersion': pge_version}
 
-    if cloud_fraction is not None:
-        ummg['CloudCover'] = int(cloud_fraction)
+    if cloud_cover is not None:
+        ummg['CloudCover'] = int(cloud_cover)
 
     return ummg
 
