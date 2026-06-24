@@ -201,19 +201,40 @@ def get_gring_boundary_points(glt_hdr_path: str):
         points.append([float(gring[i]), float(gring[i + 1])])
     return points
 
-
-def get_band_mean(input_file: str, band) -> float:
+def get_band_mean(input_file: str, band, circular: bool = False) -> float:
     """
     Determines the mean of a band
     Args:
         input_file (str): obs file (EMIT style)
         band (int, optional): Band number retrieve average from.
+        circular (bool): Treat values as angles in degrees (0-360) and use circular mean.
     Returns:
         float: mean value of given band
     """
     ds = envi.open(envi_header(input_file))
     target = ds.open_memmap(interleave='bip')[..., band]
-
     good = target > -9990
+    vals = target[good]
+    if circular:
+        rad = np.deg2rad(vals)
+        mean = np.rad2deg(np.arctan2(np.mean(np.sin(rad)), np.mean(np.cos(rad))))
+        return mean % 360
+    return np.mean(vals)
 
-    return np.mean(target[good])
+
+def get_band_means(input_file: str, circular_bands=[], return_names: bool = False):
+    ds = envi.open(envi_header(input_file))
+    cube = ds.open_memmap(interleave='bip')
+    out = []
+    for b in range(cube.shape[-1]):
+        vals = cube[..., b]
+        vals = vals[vals > -9990]
+        if b in circular_bands:
+            rad = np.deg2rad(vals)
+            out.append(np.rad2deg(np.arctan2(np.mean(np.sin(rad)), np.mean(np.cos(rad)))) % 360)
+        else:
+            out.append(np.mean(vals))
+    if return_names:
+        names = ds.metadata.get('band names', [str(i) for i in range(cube.shape[-1])])
+        return out, names
+    return out
