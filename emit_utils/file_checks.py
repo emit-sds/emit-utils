@@ -221,18 +221,19 @@ def get_band_mean(input_file: str, band, circular: bool = False) -> float:
         return mean % 360
     return np.mean(vals)
 
-def get_band_means(input_file: str, circular_bands=[], return_names: bool = False):
+def get_band_stats(input_file: str, stat: str = 'mean', circular_bands=[], return_names: bool = False):
     ds = envi.open(envi_header(input_file))
     cube = ds.open_memmap(interleave='bip')
+    stat_func = getattr(np, stat)
     out = []
     for b in range(cube.shape[-1]):
         vals = cube[..., b]
         vals = vals[vals > -9990]
         if b in circular_bands:
             rad = np.deg2rad(vals)
-            out.append(np.rad2deg(np.arctan2(np.mean(np.sin(rad)), np.mean(np.cos(rad)))) % 360)
+            out.append(np.rad2deg(np.arctan2(stat_func(np.sin(rad)), stat_func(np.cos(rad)))) % 360)
         else:
-            out.append(np.mean(vals))
+            out.append(stat_func(vals))
     if return_names:
         names = ds.metadata.get('band names', [str(i) for i in range(cube.shape[-1])])
         return out, names
