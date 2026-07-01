@@ -11,21 +11,55 @@ import numpy as np
 from spectral.io import envi
 
 
-def check_cloudfraction(mask_file: str, mask_band=7) -> float:
+def check_cloudfraction(mask_file: str, mask_band: int | list = 5) -> float | list:
     """
     Determines the cloud fraction from a mask file
 
     Args:
         mask_file (str): mask file (EMIT style)
-        mask_band (int, optional): Band number to estimate clouds from.
+        mask_band (int | list): Band(s) to check. Default is 5.
 
     Returns:
-        float: cloud fraction as rounded percent (0-100)
+        float | list: cloud fraction(s) in same order as input
     """
     ds = envi.open(envi_header(mask_file))
-    clouds = ds.open_memmap(interleave='bip')[...,mask_band]
+    data = ds.open_memmap(interleave='bip')
     
-    fraction = np.sum(clouds > 0) * 100 / np.prod(clouds.shape) 
+    single = isinstance(mask_band, int)
+    bands = [mask_band] if single else mask_band
+    
+    results = []
+    for band in bands:
+        clouds = data[..., band]
+        fraction = np.sum(clouds > 0) * 100 / np.prod(clouds.shape)
+        results.append(int(np.round(fraction)))
+    
+    return results[0] if single else results
+
+def check_cloudRatio_fraction(mask_file: str, cloud_band=0, cirrus_band=1, spectf_band=5) -> float:
+    """
+    (Cloud OR Cirrus AND SpecTF) + on_board (<-9900 in band 0) cloud percentage
+
+    Args:
+        mask_file (str): mask file
+        cloud_band (int): cloud band
+        cirrus_band (int): cirrus band
+        spectf_band (int): specTf band
+
+    Returns:
+        float: multi-criteria cloud fraction
+    """
+    ds = envi.open(envi_header(mask_file))
+    data = ds.open_memmap(interleave='bip')
+    
+    cloud = data[..., cloud_band]
+    cirrus = data[..., cirrus_band]
+    spectf = data[..., spectf_band]
+    
+    cloud_or_cirrus = (cloud > 0) | (cirrus > 0)
+    clouds = ((cloud_or_cirrus & (spectf > 0)) | (cloud < -9900)).sum()
+    fraction = clouds * 100 / cloud.size
+    
     return int(np.round(fraction))
 
 def check_nodatafraction(input_file: str, band=0, no_data_value=-9999) -> float:
