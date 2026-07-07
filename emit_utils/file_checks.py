@@ -36,7 +36,7 @@ def check_cloudfraction(mask_file: str, mask_band: int | list = 5) -> float | li
     
     return results[0] if single else results
 
-def check_cloudRatio_fraction(mask_file: str, cloud_band=0, cirrus_band=1, spectf_band=5) -> float:
+def check_cloudratio_fraction(mask_file: str, cloud_band=0, cirrus_band=1, spectf_band=5) -> float:
     """
     (Cloud OR Cirrus AND SpecTF) + on_board (<-9900 in band 0) cloud percentage
 
