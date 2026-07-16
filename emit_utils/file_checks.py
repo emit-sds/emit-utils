@@ -11,21 +11,55 @@ import numpy as np
 from spectral.io import envi
 
 
-def check_cloudfraction(mask_file: str, mask_band=7) -> float:
+def check_cloudfraction(mask_file: str, mask_band: int | list = 5) -> float | list:
     """
     Determines the cloud fraction from a mask file
 
     Args:
         mask_file (str): mask file (EMIT style)
-        mask_band (int, optional): Band number to estimate clouds from.
+        mask_band (int | list): Band(s) to check. Default is 5.
 
     Returns:
-        float: cloud fraction as rounded percent (0-100)
+        float | list: cloud fraction(s) in same order as input
     """
     ds = envi.open(envi_header(mask_file))
-    clouds = ds.open_memmap(interleave='bip')[...,mask_band]
+    data = ds.open_memmap(interleave='bip')
     
-    fraction = np.sum(clouds > 0) * 100 / np.prod(clouds.shape) 
+    single = isinstance(mask_band, int)
+    bands = [mask_band] if single else mask_band
+    
+    results = []
+    for band in bands:
+        clouds = data[..., band]
+        fraction = np.sum(clouds > 0) * 100 / np.prod(clouds.shape)
+        results.append(int(np.round(fraction)))
+    
+    return results[0] if single else results
+
+def check_cloudratio_fraction(mask_file: str, cloud_band=0, cirrus_band=1, spectf_band=5) -> float:
+    """
+    (Cloud OR Cirrus AND SpecTF) + on_board (<-9900 in band 0) cloud percentage
+
+    Args:
+        mask_file (str): mask file
+        cloud_band (int): cloud band
+        cirrus_band (int): cirrus band
+        spectf_band (int): specTf band
+
+    Returns:
+        float: multi-criteria cloud fraction
+    """
+    ds = envi.open(envi_header(mask_file))
+    data = ds.open_memmap(interleave='bip')
+    
+    cloud = data[..., cloud_band]
+    cirrus = data[..., cirrus_band]
+    spectf = data[..., spectf_band]
+    
+    cloud_or_cirrus = (cloud > 0) | (cirrus > 0)
+    clouds = ((cloud_or_cirrus & (spectf > 0)) | (cloud < -9900)).sum()
+    fraction = clouds * 100 / cloud.size
+    
     return int(np.round(fraction))
 
 def check_nodatafraction(input_file: str, band=0, no_data_value=-9999) -> float:
@@ -201,19 +235,40 @@ def get_gring_boundary_points(glt_hdr_path: str):
         points.append([float(gring[i]), float(gring[i + 1])])
     return points
 
-
-def get_band_mean(input_file: str, band) -> float:
+def get_band_mean(input_file: str, band, circular: bool = False) -> float:
     """
     Determines the mean of a band
     Args:
         input_file (str): obs file (EMIT style)
         band (int, optional): Band number retrieve average from.
+        circular (bool): Treat values as angles in degrees (0-360) and use circular mean.
     Returns:
         float: mean value of given band
     """
     ds = envi.open(envi_header(input_file))
     target = ds.open_memmap(interleave='bip')[..., band]
-
     good = target > -9990
+    vals = target[good]
+    if circular:
+        rad = np.deg2rad(vals)
+        mean = np.rad2deg(np.arctan2(np.mean(np.sin(rad)), np.mean(np.cos(rad))))
+        return mean % 360
+    return np.mean(vals)
 
-    return np.mean(target[good])
+def get_band_stats(input_file: str, stat: str = 'mean', circular_bands=[], return_names: bool = False):
+    ds = envi.open(envi_header(input_file))
+    cube = ds.open_memmap(interleave='bip')
+    stat_func = getattr(np, stat)
+    out = []
+    for b in range(cube.shape[-1]):
+        vals = cube[..., b]
+        vals = vals[vals > -9990]
+        if b in circular_bands:
+            rad = np.deg2rad(vals)
+            out.append(np.rad2deg(np.arctan2(stat_func(np.sin(rad)), stat_func(np.cos(rad)))) % 360)
+        else:
+            out.append(stat_func(vals))
+    if return_names:
+        names = ds.metadata.get('band names', [str(i) for i in range(cube.shape[-1])])
+        return out, names
+    return out
