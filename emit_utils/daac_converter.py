@@ -237,7 +237,8 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, software_deli
 
     primary_ds = envi.open(envi_header(primary_envi_file))
 
-    nc_ds.flight_line = os.path.basename(primary_envi_file)[:31]
+    # Include base flight line name - emitYYYYMMDDthhmmss
+    nc_ds.flight_line = os.path.basename(primary_envi_file)[:19]
 
     nc_ds.time_coverage_start = primary_ds.metadata['emit acquisition start time']
     nc_ds.time_coverage_end = primary_ds.metadata['emit acquisition stop time']
