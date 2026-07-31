@@ -249,7 +249,7 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, software_deli
         with open(rdn_runconfig_file, "r") as f:
             runconfig = json.load(f)
         ffupdate_files = [os.path.basename(p) for p in runconfig["flat_field_update_paths"]]
-        ffupdate_str = ",".join(ffupdate_files)
+        ffupdate_str = ", ".join(ffupdate_files)
         primary_ds.metadata['emit pge input files'].append(f"ffupdate_files=[{ffupdate_str}]")
     run_command = "PGE Run Command: {" + primary_ds.metadata['emit pge run command'] + "}"
     input_files = "PGE Input Files: {" + ", ".join(primary_ds.metadata['emit pge input files']) + "}"
