@@ -40,10 +40,9 @@ import hashlib
 import netCDF4
 import os
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from osgeo import gdal, osr
 from spectral.io import envi
-from typing import List
 import json
 import numpy as np
 
@@ -80,7 +79,7 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
     return output_extent, trans[1]
 
 
-def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
+def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, standard_name = None, fill_value = -9999.):
     
     if data_type == "u1":
         kargs['fill_value'] = np.uint8(np.mod(int(NODATA), 2**8))
@@ -90,6 +89,8 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_
         kargs['fill_value'] = fill_value
  
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
+    if standard_name is not None:
+        nc_var.standard_name = standard_name
     if long_name is not None:
         nc_var.long_name = long_name
     if units is not None:
@@ -115,13 +116,16 @@ def add_loc(nc_ds, loc_envi_file, fill_value = -9999.):
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/lon", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
+                 {"dimensions": ("downtrack", "crosstrack")}, standard_name = "longitude",
+                 fill_value = fill_value)
 
     add_variable(nc_ds, "location/lat", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
+                 {"dimensions": ("downtrack", "crosstrack")}, standard_name = "latitude",
+                 fill_value = fill_value)
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
+                 {"dimensions": ("downtrack", "crosstrack")}, standard_name = "surface_altitude",
+                 fill_value = fill_value)
     nc_ds.sync()
 
 
@@ -550,7 +554,6 @@ def check_ummg(ummg: dict):
 
 
 def calc_checksum(path, hash_alg="sha512"):
-    checksum = {}
     if hash_alg.lower() == "sha512":
         h = hashlib.sha512()
     with open(path, "rb") as f:
