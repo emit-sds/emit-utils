@@ -187,13 +187,15 @@ def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
     # required and highly recommended
     nc_ds.ncei_template_version = "NCEI_NetCDF_Swath_Template_v2.0"  # required by cheatsheet
     nc_ds.summary = "The Earth Surface Mineral Dust Source Investigation (EMIT) is an Earth Ventures-Instrument (EVI-4) \
-Mission that maps the surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and \
-short-wave infrared (VSWIR). Installed on the International Space Station (ISS), the EMIT instrument is a Dyson \
-imaging spectrometer that uses contiguous spectroscopic measurements from 410 to 2450 nm to resolve absoprtion \
-features of iron oxides, clays, sulfates, carbonates, and other dust-forming minerals. During its one-year mission, \
-EMIT will observe the sunlit Earth's dust source regions that occur within +/-52° latitude and produce maps of the \
-source regions that can be used to improve forecasts of the role of mineral dust in the radiative forcing \
-(warming or cooling) of the atmosphere."
+Mission. Installed on the International Space Station (ISS), the EMIT instrument is a Dyson imaging spectrometer that \
+makes contiguous spectroscopic measurements from 380 to 2500 nm, at approximately 7.5 nm sampling. The prime mission \
+was designed to map surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and short-wave \
+infrared (VSWIR). During the prime mission, the EMIT team focused on using surface reflectance to resolve absorption \
+features of iron oxides, clays, sulfates, carbonates, and other dust-forming minerals in Earth's dust source regions \
+within +/-52° latitude.  These measurements were used to produce maps of dust source regions, improving forecasts of \
+the role mineral dust plays in the radiative forcing (warming or cooling) of the atmosphere.  In its extended mission, \
+EMIT’s core measurements remain the same, but acquisitions expand to sample all regions observable from the ISS orbit, \
+supporting efforts across the atmosphere, biosphere, cryosphere, geosphere, hydrosphere, and more."
 
     nc_ds.keywords = "Imaging Spectroscopy, minerals, EMIT, dust, radiative forcing"
     # Not required or highly recommended.
