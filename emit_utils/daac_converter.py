@@ -40,10 +40,9 @@ import hashlib
 import netCDF4
 import os
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from osgeo import gdal, osr
 from spectral.io import envi
-from typing import List
 import json
 import numpy as np
 
@@ -80,7 +79,7 @@ def _get_spatial_extent_res(path, projection_epsg=4326):
     return output_extent, trans[1]
 
 
-def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_value = -9999.):
+def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, standard_name = None, fill_value = -9999.):
     
     if data_type == "u1":
         kargs['fill_value'] = np.uint8(np.mod(int(NODATA), 2**8))
@@ -90,6 +89,8 @@ def add_variable(nc_ds, nc_name, data_type, long_name, units, data, kargs, fill_
         kargs['fill_value'] = fill_value
  
     nc_var = nc_ds.createVariable(nc_name, data_type, **kargs)
+    if standard_name is not None:
+        nc_var.standard_name = standard_name
     if long_name is not None:
         nc_var.long_name = long_name
     if units is not None:
@@ -115,13 +116,16 @@ def add_loc(nc_ds, loc_envi_file, fill_value = -9999.):
     """
     loc = envi.open(envi_header(loc_envi_file)).open_memmap(interleave='bip')
     add_variable(nc_ds, "location/lon", "d", "Longitude (WGS-84)", "degrees east", loc[..., 0].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
+                 {"dimensions": ("downtrack", "crosstrack")}, standard_name = "longitude",
+                 fill_value = fill_value)
 
     add_variable(nc_ds, "location/lat", "d", "Latitude (WGS-84)", "degrees north", loc[..., 1].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
+                 {"dimensions": ("downtrack", "crosstrack")}, standard_name = "latitude",
+                 fill_value = fill_value)
 
     add_variable(nc_ds, "location/elev", "d", "Surface Elevation", "m", loc[..., 2].copy(),
-                 {"dimensions": ("downtrack", "crosstrack")}, fill_value = fill_value)
+                 {"dimensions": ("downtrack", "crosstrack")}, standard_name = "surface_altitude",
+                 fill_value = fill_value)
     nc_ds.sync()
 
 
@@ -183,13 +187,15 @@ def makeGlobalAttrBase(nc_ds: netCDF4.Dataset):
     # required and highly recommended
     nc_ds.ncei_template_version = "NCEI_NetCDF_Swath_Template_v2.0"  # required by cheatsheet
     nc_ds.summary = "The Earth Surface Mineral Dust Source Investigation (EMIT) is an Earth Ventures-Instrument (EVI-4) \
-Mission that maps the surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and \
-short-wave infrared (VSWIR). Installed on the International Space Station (ISS), the EMIT instrument is a Dyson \
-imaging spectrometer that uses contiguous spectroscopic measurements from 410 to 2450 nm to resolve absoprtion \
-features of iron oxides, clays, sulfates, carbonates, and other dust-forming minerals. During its one-year mission, \
-EMIT will observe the sunlit Earth's dust source regions that occur within +/-52° latitude and produce maps of the \
-source regions that can be used to improve forecasts of the role of mineral dust in the radiative forcing \
-(warming or cooling) of the atmosphere."
+Mission. Installed on the International Space Station (ISS), the EMIT instrument is a Dyson imaging spectrometer that \
+makes contiguous spectroscopic measurements from 380 to 2500 nm, at approximately 7.5 nm sampling. The prime mission \
+was designed to map surface mineralogy of arid dust source regions via imaging spectroscopy in the visible and short-wave \
+infrared (VSWIR). During the prime mission, the EMIT team focused on using surface reflectance to resolve absorption \
+features of iron oxides, clays, sulfates, carbonates, and other dust-forming minerals in Earth's dust source regions \
+within +/-52° latitude.  These measurements were used to produce maps of dust source regions, improving forecasts of \
+the role mineral dust plays in the radiative forcing (warming or cooling) of the atmosphere.  In its extended mission, \
+EMIT’s core measurements remain the same, but acquisitions expand to sample all regions observable from the ISS orbit, \
+supporting efforts across the atmosphere, biosphere, cryosphere, geosphere, hydrosphere, and more."
 
     nc_ds.keywords = "Imaging Spectroscopy, minerals, EMIT, dust, radiative forcing"
     # Not required or highly recommended.
@@ -550,7 +556,6 @@ def check_ummg(ummg: dict):
 
 
 def calc_checksum(path, hash_alg="sha512"):
-    checksum = {}
     if hash_alg.lower() == "sha512":
         h = hashlib.sha512()
     with open(path, "rb") as f:
