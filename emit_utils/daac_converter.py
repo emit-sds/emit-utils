@@ -216,7 +216,7 @@ supporting efforts across the atmosphere, biosphere, cryosphere, geosphere, hydr
     nc_ds.project = "Earth Surface Mineral Dust Source Investigation"
     nc_ds.project_url = "https://earth.jpl.nasa.gov/emit/"
     nc_ds.publisher_name = "NASA LPDAAC"
-    nc_ds.publisher_url = "https://lpdaac.usgs.gov"
+    nc_ds.publisher_url = "https://www.earthdata.nasa.gov/centers/lp-daac"
     nc_ds.publisher_email = "lpdaac@usgs.gov"
     nc_ds.identifier_product_doi_authority = "https://doi.org"
 
