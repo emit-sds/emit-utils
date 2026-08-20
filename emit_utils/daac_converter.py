@@ -50,7 +50,7 @@ from emit_utils.file_checks import envi_header
 
 NODATA = -9999.
 
-def _get_spatial_extent_res(path, projection_epsg=4326):
+def get_spatial_extent_res(path, projection_epsg=4326):
     """
     Get the spatial extent of a dataset, converted to a specified projection
     Args:
@@ -268,7 +268,7 @@ def makeGlobalAttr(nc_ds: netCDF4.Dataset, primary_envi_file: str, software_deli
 
     # only include spatial information if provided (may not be available for all PGEs)
     if glt_envi_file is not None:
-        ul_lr, res = _get_spatial_extent_res(glt_envi_file)
+        ul_lr, res = get_spatial_extent_res(glt_envi_file)
         nc_ds.easternmost_longitude = ul_lr[2]
         nc_ds.northernmost_latitude = ul_lr[1]
         nc_ds.westernmost_longitude = ul_lr[0]
