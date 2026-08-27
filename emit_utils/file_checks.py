@@ -242,7 +242,7 @@ def get_gring_from_loc(loc_hdr_path: str):
         loc_hdr_path: Path to the ENVI .hdr file of the LOC image.
 
     Returns:
-        List of five [lon, lat] pairs, counter clockwise, first == last.
+        List of 4 [lon, lat] pairs, counter clockwise.
     """
     ds = envi.open(loc_hdr_path)
     mm = ds.open_memmap(interleave='bip')
