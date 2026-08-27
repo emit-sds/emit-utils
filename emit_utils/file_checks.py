@@ -235,6 +235,35 @@ def get_gring_boundary_points(glt_hdr_path: str):
         points.append([float(gring[i]), float(gring[i + 1])])
     return points
 
+def get_gring_from_loc(loc_hdr_path: str):
+    """Build a closed, counter clockwise gring polygon from an ENVI LOC file.
+
+    Args:
+        loc_hdr_path: Path to the ENVI .hdr file of the LOC image.
+
+    Returns:
+        List of five [lon, lat] pairs, counter clockwise, first == last.
+    """
+    ds = envi.open(loc_hdr_path)
+    mm = ds.open_memmap(interleave='bip')
+    gring = [
+        mm[0, 0, :2].tolist(),
+        mm[0, -1, :2].tolist(),
+        mm[-1, -1, :2].tolist(),
+        mm[-1, 0, :2].tolist(),
+    ]
+    del mm
+    # shoelace signed area: negative means clockwise
+    area = sum(
+        gring[i][0] * gring[(i + 1) % 4][1] - gring[(i + 1) % 4][0] * gring[i][1]
+        for i in range(4)
+    )
+    if area < 0:
+        gring.reverse()
+    # close the ring
+    gring.append(list(gring[0]))
+    return gring
+
 def get_band_mean(input_file: str, band, circular: bool = False) -> float:
     """
     Determines the mean of a band
