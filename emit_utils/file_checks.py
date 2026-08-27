@@ -236,7 +236,7 @@ def get_gring_boundary_points(glt_hdr_path: str):
     return points
 
 def get_gring_from_loc(loc_hdr_path: str):
-    """Build a closed, counter clockwise gring polygon from an ENVI LOC file.
+    """Build a counter clockwise gring polygon from an ENVI LOC file.
 
     Args:
         loc_hdr_path: Path to the ENVI .hdr file of the LOC image.
@@ -260,8 +260,6 @@ def get_gring_from_loc(loc_hdr_path: str):
     )
     if area < 0:
         gring.reverse()
-    # close the ring
-    gring.append(list(gring[0]))
     return gring
 
 def get_band_mean(input_file: str, band, circular: bool = False) -> float:
