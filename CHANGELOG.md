@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+#### [v2.0.0](https://github.com/emit-sds/emit-utils/compare/v1.4.3...v2.0.0)
+
+> 3 Sep 2026
+
+* v2 Reprocessing Support by @winstonolson in https://github.com/emit-sds/emit-utils/pull/28
+* Band stats and cloud-fraction updates by @adamchlus in https://github.com/emit-sds/emit-utils/pull/29
+* NetCDF fuction updates by @adamchlus in https://github.com/emit-sds/emit-utils/pull/30
+* Implement get_gring_from_loc function by @adamchlus in https://github.com/emit-sds/emit-utils/pull/31
+
+
 #### [v1.4.3](https://github.com/emit-sds/emit-utils/compare/v1.4.2...v1.4.3)
 
 > 19 Mar 2026
