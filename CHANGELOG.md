@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+#### [v2.0.1](https://github.com/emit-sds/emit-utils/compare/v2.0.0...v2.0.1)
+
+> 17 Sep 2026
+
+* Get closing point from formatted points list by @adamchlus in https://github.com/emit-sds/emit-utils/pull/33
+
 #### [v2.0.0](https://github.com/emit-sds/emit-utils/compare/v1.4.3...v2.0.0)
 
 > 3 Sep 2026
